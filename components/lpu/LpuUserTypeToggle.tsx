@@ -21,6 +21,7 @@ export function LpuUserTypeToggle() {
           size="sm"
           variant={userType === type.id ? 'default' : 'outline'}
           onClick={() => setUserType(type.id)}
+          aria-pressed={userType === type.id}
           className={
             userType === type.id
               ? 'bg-amber-500 text-black hover:bg-amber-400'

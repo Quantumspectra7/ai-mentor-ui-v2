@@ -5,6 +5,7 @@ import { Playfair_Display, Manrope } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-context'
 import { ThemeWrapper } from '@/components/theme-wrapper'
+import { AuthProvider } from '@/components/auth-provider'
 
 const playfair = Playfair_Display({
   weight: ['400', '500', '600', '700'],
@@ -34,14 +35,39 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const themeScript = `(() => {
+  try {
+    const stored = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = stored === 'light' || stored === 'dark' ? stored : (prefersDark ? 'dark' : 'light');
+    const root = document.documentElement;
+    const body = document.body;
+    root.setAttribute('data-theme', theme);
+    root.classList.toggle('dark', theme === 'dark');
+    root.classList.toggle('light', theme === 'light');
+    if (body) {
+      body.setAttribute('data-theme', theme);
+      body.classList.toggle('dark', theme === 'dark');
+      body.classList.toggle('light', theme === 'light');
+    }
+  } catch (e) {
+    // Ignore theme bootstrap failures.
+  }
+})();`;
+
   return (
-    <html lang="en" className={`${playfair.variable} ${manrope.variable} dark`}>
+    <html lang="en" className={`${playfair.variable} ${manrope.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="font-sans antialiased bg-background text-foreground">
-        <ThemeProvider>
-          <ThemeWrapper>
-            {children}
-          </ThemeWrapper>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <ThemeWrapper>
+              {children}
+            </ThemeWrapper>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )

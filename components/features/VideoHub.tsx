@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Video, videoData, UserType } from '@/lib/lpuData';
-import { Play } from 'lucide-react';
+import { Play, Eye, ThumbsUp, Bookmark, ArrowLeft, PlayCircle } from 'lucide-react';
 
 interface VideoHubProps {
   userType: UserType;
@@ -18,16 +18,13 @@ export function VideoHub({ userType, onBack }: VideoHubProps) {
   const [watchLater, setWatchLater] = useState<string[]>([]);
 
   useEffect(() => {
-    // Filter videos for this user type
     const filtered = videoData.filter((v) => v.forUserTypes.includes(userType));
     setVideos(filtered);
-
-    // Load watch-later from localStorage
     const saved = localStorage.getItem(`watchLater-${userType}`);
     if (saved) setWatchLater(JSON.parse(saved));
   }, [userType]);
 
-  const categories = ['all', ...new Set(videos.map((v) => v.category))];
+  const categories = ['all', ...Array.from(new Set(videos.map((v) => v.category)))];
 
   const displayVideos =
     selectedCategory === 'all'
@@ -43,42 +40,59 @@ export function VideoHub({ userType, onBack }: VideoHubProps) {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
         {/* Header */}
-        <div className="mb-12">
-          {onBack && (
-            <Button variant="outline" className="mb-4" onClick={onBack}>
-              ← Back
-            </Button>
-          )}
-          <p className="eyebrow text-xs text-amber-300">Video Library</p>
-          <h1 className="font-display hero-title text-4xl text-amber-50 mb-2 md:text-5xl">📹 Video Hub</h1>
-          <p className="text-amber-100/70">
-            {videos.length} videos for {userType.replace('-', ' ')} students
-          </p>
+        <div className="relative mb-12 p-8 md:p-12 rounded-[2.5rem] bg-card border shadow-sm flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="relative z-10">
+            {onBack && (
+              <Button variant="ghost" className="mb-6 text-muted-foreground hover:text-foreground border bg-background hover:bg-accent rounded-full pl-3 pr-5 shadow-sm" onClick={onBack}>
+                <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
+              </Button>
+            )}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-wide uppercase mb-5 shadow-sm">
+              <PlayCircle className="w-4 h-4" /> Media Library
+            </div>
+            <h1 className="text-4xl md:text-5xl font-display font-extrabold tracking-tight text-foreground mb-3">
+              AI <span className="text-primary">Vision</span>
+            </h1>
+            <p className="text-muted-foreground text-lg max-w-xl leading-relaxed">
+              Curated cinematic experiences and essential guides tailored exclusively for <span className="capitalize font-semibold text-foreground">{userType.replace('-', ' ')}</span> students.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4 bg-background border rounded-2xl p-4 shadow-sm shrink-0">
+             <div className="text-center px-4 border-r">
+               <p className="text-3xl font-bold text-foreground">{videos.length}</p>
+               <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Videos</p>
+             </div>
+             <div className="text-center px-4">
+               <p className="text-3xl font-bold text-primary">{watchLater.length}</p>
+               <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Saved</p>
+             </div>
+          </div>
         </div>
 
         {/* Category Filter */}
-        <div className="mb-8 flex flex-wrap gap-2">
+        <div className="mb-10 flex flex-wrap gap-3">
           {categories.map((cat) => (
-            <Button
+            <button
               key={cat}
-              variant={selectedCategory === cat ? 'default' : 'outline'}
               onClick={() => setSelectedCategory(cat)}
-              className={
+              className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border shadow-sm ${
                 selectedCategory === cat
-                  ? 'bg-amber-500 text-black hover:bg-amber-400'
-                  : 'border-amber-500/30 text-amber-100'
-              }
+                  ? 'bg-primary border-primary text-primary-foreground'
+                  : 'bg-card border-input text-muted-foreground hover:bg-accent hover:text-foreground hover:border-accent-foreground/20'
+              }`}
             >
-              {cat === 'campus-tour' ? '🏫' : cat === 'admission' ? '📝' : cat === 'hostel' ? '🛏️' : cat === 'academics' ? '📚' : '💻'}{' '}
+              {cat === 'all' && '✨ '}
+              {cat === 'campus-tour' ? '🏫 ' : cat === 'admission' ? '📝 ' : cat === 'hostel' ? '🛏️ ' : cat === 'academics' ? '📚 ' : cat === 'coding' ? '💻 ' : ''}
               {cat.replace('-', ' ').toUpperCase()}
-            </Button>
+            </button>
           ))}
         </div>
 
-        {/* Videos Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Video Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {displayVideos.map((video) => (
             <VideoCard
               key={video.id}
@@ -89,52 +103,49 @@ export function VideoHub({ userType, onBack }: VideoHubProps) {
           ))}
         </div>
 
-        {/* Watch Later Section */}
+        {/* Watch Later Tray */}
         {watchLater.length > 0 && (
-          <div className="mt-16 p-8 rounded-3xl luxe-card">
-            <h2 className="font-display text-2xl text-amber-50 mb-4">
-              💾 Watch Later ({watchLater.length})
-            </h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              {videos
-                .filter((v) => watchLater.includes(v.id))
-                .map((video) => (
-                  <div
-                    key={video.id}
-                    className="flex items-start gap-3 p-3 rounded-2xl border border-amber-500/20 bg-black/30"
-                  >
-                    <div className="text-2xl">📌</div>
-                    <div>
-                      <p className="font-semibold text-amber-50">{video.title}</p>
-                      <p className="text-xs text-amber-100/60">{video.duration} min</p>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => toggleWatchLater(video.id)}
-                      className="ml-auto text-amber-200 hover:text-amber-100"
+          <div className="mt-16 relative p-8 md:p-10 rounded-[2.5rem] border bg-card shadow-sm">
+            <div className="relative z-10">
+              <h2 className="font-display text-2xl font-bold text-foreground mb-8 flex items-center gap-3">
+                <Bookmark className="w-6 h-6 text-primary" /> Saved For Later ({watchLater.length})
+              </h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {videos
+                  .filter((v) => watchLater.includes(v.id))
+                  .map((video) => (
+                    <div
+                      key={video.id}
+                      className="group flex items-center gap-4 p-4 rounded-2xl border bg-background hover:bg-accent transition-all cursor-pointer shadow-sm hover:shadow-md"
                     >
-                      ✕
-                    </Button>
-                  </div>
-                ))}
+                      <div className="relative w-24 h-16 rounded-xl overflow-hidden shrink-0 shadow-sm border">
+                        <img 
+                          src={video.thumbnailUrl || `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`} 
+                          alt="Thumbnail"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Play className="w-5 h-5 text-white" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0 pr-2">
+                        <p className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors">{video.title}</p>
+                        <p className="text-xs text-muted-foreground font-medium mt-1">{video.duration} min</p>
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={(e) => { e.stopPropagation(); toggleWatchLater(video.id); }}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive text-muted-foreground h-9 w-9 rounded-full shrink-0 border bg-background"
+                      >
+                         ✕
+                      </Button>
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
         )}
-
-        {/* Pro Tips */}
-        <Card className="mt-12 luxe-card">
-          <CardHeader>
-            <CardTitle className="font-display text-2xl text-amber-50">💡 How to use videos effectively</CardTitle>
-          </CardHeader>
-          <CardContent className="text-amber-100/70 space-y-2">
-            <p>✓ Watch the admission/campus tour videos first for overview</p>
-            <p>✓ Watch hostel life videos before first day</p>
-            <p>✓ Coding videos are most watched (save them!) </p>
-            <p>✓ Mark as "Watch Later" and refer before important events</p>
-            <p>✓ Rate videos (👍👎) to help other students</p>
-          </CardContent>
-        </Card>
     </div>
   );
 }
@@ -149,61 +160,60 @@ function VideoCard({
   onToggleWatchLater: () => void;
 }) {
   return (
-    <Card className="luxe-card transition-all overflow-hidden cursor-pointer group">
-      {/* Thumbnail */}
-      <div className="relative w-full aspect-video bg-black/40 flex items-center justify-center overflow-hidden">
-        <img
-          src={video.thumbnailUrl || `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`}
-          alt={video.title}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-        />
-        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 flex items-center justify-center transition-all">
-          <Play className="w-16 h-16 text-white/70 group-hover:text-white" />
+    <Card className="relative h-[22rem] group overflow-hidden border bg-background rounded-3xl cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+      {/* Background Thumbnail */}
+      <img
+        src={video.thumbnailUrl || `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`}
+        alt={video.title}
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+      />
+      
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
+      
+      {/* Play Button */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-95 group-hover:scale-100 z-10">
+        <div className="w-16 h-16 rounded-full bg-primary/90 text-primary-foreground backdrop-blur-md flex items-center justify-center shadow-lg">
+          <Play className="w-7 h-7 ml-1" />
         </div>
-        <Badge className="absolute top-2 right-2 bg-amber-500 text-black">{video.duration}m</Badge>
       </div>
 
-      <CardHeader>
-        <CardTitle className="text-lg text-amber-50 line-clamp-2">
-          {video.title}
-        </CardTitle>
-        <CardDescription className="text-amber-100/60">{video.description}</CardDescription>
-      </CardHeader>
+      {/* Duration Badge */}
+      <div className="absolute top-4 right-4 z-20">
+        <div className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/20 text-xs font-bold text-white shadow-sm">
+          {video.duration}m
+        </div>
+      </div>
 
-      <CardContent>
-        {/* Tags */}
-        <div className="flex flex-wrap gap-1 mb-4">
+      {/* Content */}
+      <div className="absolute bottom-0 left-0 w-full p-6 flex flex-col justify-end translate-y-2 group-hover:translate-y-0 transition-transform duration-500 z-20">
+        <div className="flex gap-2 mb-3">
           {video.tags.slice(0, 2).map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs border-amber-500/50 text-amber-200">
+            <Badge key={tag} variant="outline" className="text-[10px] uppercase font-bold tracking-wider border-primary/50 text-white bg-primary/40 backdrop-blur-md">
               {tag}
             </Badge>
           ))}
         </div>
-
-        {/* Stats */}
-        <div className="flex items-center justify-between text-sm text-amber-100/60 mb-4 pb-4 border-b border-amber-500/20">
-          <span>👁️ {video.views.toLocaleString()} views</span>
-          <span>👍 {video.helpful.toLocaleString()} helpful</span>
-        </div>
-
-        {/* Actions */}
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            className="flex-1 bg-amber-500 text-black hover:bg-amber-400"
+        
+        <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+          {video.title}
+        </h3>
+        
+        <div className="flex items-center justify-between text-xs text-white/70 mt-3 font-medium opacity-70 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1.5"><Eye className="w-4 h-4"/> {video.views.toLocaleString()}</span>
+            <span className="flex items-center gap-1.5"><ThumbsUp className="w-4 h-4"/> {video.helpful}</span>
+          </div>
+          <Button 
+            size="icon" 
+            variant="ghost" 
+            className={`h-9 w-9 rounded-full ${isWatchLater ? 'bg-primary text-primary-foreground border-transparent' : 'bg-white/10 text-white border-white/20'} hover:bg-white/20 border`}
+            onClick={(e) => { e.stopPropagation(); onToggleWatchLater(); }}
           >
-            <Play className="w-4 h-4 mr-1" /> Watch
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onToggleWatchLater}
-            className={isWatchLater ? 'border-amber-500 text-amber-200' : 'border-amber-500/30 text-amber-100'}
-          >
-            {isWatchLater ? '❤️' : '🤍'}
+            <Bookmark className={isWatchLater ? 'fill-current' : ''} size={15} />
           </Button>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 }

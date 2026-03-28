@@ -46,58 +46,61 @@ export function PanicButton() {
     <>
       <button
         onClick={handleOpen}
-        className="px-4 py-2 rounded-xl font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 smooth-transition glow-primary flex items-center gap-2 animate-pulse"
+        className="px-4 py-2.5 rounded-xl font-bold text-destructive-foreground bg-destructive hover:bg-destructive/90 hover:shadow-lg transition-all flex items-center gap-2 shadow-sm animate-pulse"
       >
-        <AlertCircle className="w-5 h-5" />
+        <AlertCircle className="w-5 h-5 shrink-0" />
         <span className="hidden sm:inline">Help!</span>
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md glass-accent border-primary/20">
+        <DialogContent className="max-w-md bg-card border-destructive/20 shadow-xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-white flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-red-500/20">
-                <AlertCircle className="w-6 h-6 text-red-400" />
+            <DialogTitle className="text-2xl font-display font-bold text-foreground flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-destructive/10 border border-destructive/20">
+                <AlertCircle className="w-6 h-6 text-destructive" />
               </div>
               I'm Stressed
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-6 py-4">
-            <div className="space-y-2">
-              <h3 className="text-lg font-bold text-white">{currentResponse.title}</h3>
-              <p className="text-gray-300 leading-relaxed text-sm">{currentResponse.advice}</p>
+            <div className="space-y-2 p-5 bg-background border rounded-2xl shadow-sm">
+              <h3 className="text-lg font-bold text-foreground">{currentResponse.title}</h3>
+              <p className="text-muted-foreground leading-relaxed text-sm font-medium">{currentResponse.advice}</p>
             </div>
 
             <div className="space-y-3">
-              <p className="text-sm font-semibold text-white uppercase tracking-wide">What you can do right now:</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest pl-1">What you can do right now:</p>
               <div className="space-y-2">
                 {currentResponse.actions.map((action, index) => (
                   <button
                     key={index}
-                    className="w-full px-4 py-3 rounded-lg glass smooth-transition hover:border-primary/40 text-left text-sm font-medium text-white text-balance"
+                    className="w-full px-5 py-4 rounded-xl bg-card border hover:border-primary hover:bg-accent hover:shadow-sm text-left text-sm font-bold text-foreground transition-all flex items-center gap-3"
                   >
+                    <div className="w-6 h-6 shrink-0 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs">
+                      {index + 1}
+                    </div>
                     {action}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="p-4 rounded-xl glass border border-primary/20">
-              <p className="text-sm text-gray-300 text-balance">
-                <strong className="text-primary">Remember:</strong> You've handled 100% of the difficult days in your life so far. You've got this.
+            <div className="p-5 rounded-2xl bg-primary/5 border border-primary/20">
+              <p className="text-sm text-muted-foreground font-medium text-balance leading-relaxed">
+                <strong className="text-primary font-bold">Remember:</strong> You've handled 100% of the difficult days in your life so far. You've got this.
               </p>
             </div>
 
-            <div className="flex gap-2 pt-4">
+            <div className="flex gap-3 pt-4">
               <button
-                className="flex-1 px-4 py-2 rounded-lg glass smooth-transition hover:border-primary/40 font-medium"
+                className="flex-1 px-4 py-3 rounded-xl bg-card border hover:bg-accent text-foreground font-bold transition-colors shadow-sm"
                 onClick={() => setOpen(false)}
               >
                 Close
               </button>
               <button
-                className="flex-1 px-4 py-2 rounded-lg btn-gradient font-medium"
+                className="flex-1 px-4 py-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold transition-colors shadow-sm"
                 onClick={() => {
                   const newResponse = panicResponses[Math.floor(Math.random() * panicResponses.length)];
                   setCurrentResponse(newResponse);

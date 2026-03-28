@@ -15,17 +15,17 @@ export function CampusGuide({ onBack }: CampusGuideProps) {
   const renderItems = () => {
     const items = campusGuide[activeTab];
     return items.map((item, index) => (
-      <div key={index} className="glass-accent rounded-2xl p-6 smooth-transition hover:border-primary/40 group animate-fade-up" style={{ animationDelay: `${index * 0.05}s` }}>
+      <div key={index} className="bg-card border rounded-2xl p-6 transition-all hover:border-primary/40 hover:shadow-md group animate-in fade-in slide-in-from-bottom-2" style={{ animationDelay: `${index * 50}ms` }}>
         <div className="flex items-start gap-4">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 group-hover:from-primary/30 group-hover:to-primary/20 smooth-transition text-2xl">
+          <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 text-primary transition-colors text-2xl shrink-0 border border-primary/20">
             {item.icon}
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-primary smooth-transition">{item.name}</h3>
-            <p className="text-sm text-gray-300 mb-3 leading-relaxed">{item.description}</p>
-            <div className="flex items-start gap-2 pt-3 border-t border-primary/10">
-              <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-gray-400">{item.tips}</p>
+            <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">{item.name}</h3>
+            <p className="text-sm text-muted-foreground mb-4 leading-relaxed font-medium">{item.description}</p>
+            <div className="flex items-start gap-2 pt-3 border-t">
+              <MapPin className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+              <p className="text-xs font-semibold text-muted-foreground">{item.tips}</p>
             </div>
           </div>
         </div>
@@ -34,40 +34,35 @@ export function CampusGuide({ onBack }: CampusGuideProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background relative">
-      {/* Background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-10 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-80 h-80 bg-secondary/5 rounded-full blur-3xl"></div>
-      </div>
+    <div className="min-h-screen bg-background relative font-sans text-foreground">
 
       {/* Header */}
-      <div className="glass-accent sticky top-0 z-40 border-b border-primary/10">
-        <div className="max-w-4xl mx-auto px-4 py-5 flex items-center gap-4">
+      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
           <button
             onClick={onBack}
-            className="p-2 rounded-lg glass smooth-transition hover:border-primary/40"
+            className="p-2 bg-card border rounded-xl hover:bg-accent hover:border-accent-foreground/20 transition-all shadow-sm shrink-0"
           >
-            <ArrowLeft className="w-5 h-5 text-white" />
+            <ArrowLeft className="w-5 h-5 text-foreground" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-white">Campus Guide</h1>
-            <p className="text-sm text-gray-400">Navigate, explore, and discover your campus</p>
+            <h1 className="text-xl md:text-2xl font-bold font-display tracking-tight text-foreground">Campus Guide</h1>
+            <p className="text-xs md:text-sm text-muted-foreground font-medium">Navigate, explore, and discover your campus</p>
           </div>
         </div>
       </div>
 
-      <main className="relative z-10 max-w-4xl mx-auto px-4 py-12">
+      <main className="relative z-10 max-w-4xl mx-auto px-6 py-12">
         {/* Tabs */}
-        <div className="flex gap-3 mb-10 flex-wrap animate-fade-up">
+        <div className="flex gap-3 mb-10 flex-wrap animate-in fade-in slide-in-from-bottom-4">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-xl font-medium smooth-transition capitalize ${
+              className={`px-5 py-2.5 outline-none rounded-xl text-sm font-bold transition-all shadow-sm capitalize ${
                 activeTab === tab
-                  ? 'btn-gradient text-white'
-                  : 'glass hover:border-primary/40'
+                  ? 'bg-primary text-primary-foreground border-primary border'
+                  : 'bg-card border hover:border-primary/40 hover:bg-accent text-muted-foreground hover:text-foreground'
               }`}
             >
               {tab}
@@ -76,15 +71,20 @@ export function CampusGuide({ onBack }: CampusGuideProps) {
         </div>
 
         {/* Content Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
           {renderItems()}
         </div>
 
         {/* Helpful Tips */}
-        <div className="glass-accent rounded-2xl p-8 border-primary/20 animate-fade-up" style={{ animationDelay: '0.2s' }}>
-          <div className="flex items-start gap-3 mb-6">
-            <Navigation className="w-6 h-6 text-primary flex-shrink-0" />
-            <h3 className="text-xl font-semibold text-white">Getting Around Campus</h3>
+        <div className="bg-card border rounded-3xl p-8 md:p-10 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="flex items-start gap-4 mb-8">
+            <div className="p-3 bg-primary/10 rounded-xl border border-primary/20 shrink-0">
+               <Navigation className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-display font-bold text-foreground">Getting Around Campus</h3>
+              <p className="text-sm font-medium text-muted-foreground mt-1">Essential tips for navigating effectively.</p>
+            </div>
           </div>
           <ul className="space-y-4">
             {[
@@ -94,13 +94,16 @@ export function CampusGuide({ onBack }: CampusGuideProps) {
               "Seniors are your best guide. Don't hesitate to ask for directions",
               "Explore one new area every day to build confidence"
             ].map((tip, idx) => (
-              <li key={idx} className="flex gap-3 text-sm text-gray-300">
-                <span className="text-primary font-bold flex-shrink-0">✓</span>
-                <span>{tip}</span>
+              <li key={idx} className="flex gap-4 items-start text-sm font-medium text-muted-foreground group">
+                <div className="w-6 h-6 shrink-0 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-110 transition-all font-bold text-[10px]">
+                  ✓
+                </div>
+                <span className="mt-0.5 group-hover:text-foreground transition-colors leading-relaxed">{tip}</span>
               </li>
             ))}
           </ul>
         </div>
+
       </main>
     </div>
   );

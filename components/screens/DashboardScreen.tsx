@@ -7,8 +7,7 @@ import { DailyTasks } from '@/components/features/DailyTasks';
 import { CampusGuide } from '@/components/features/CampusGuide';
 import { StudyHelper } from '@/components/features/StudyHelper';
 import { PanicButton } from '@/components/features/PanicButton';
-import { GlowingCard } from '@/components/ui/animated-components';
-import { CheckCircle2, MapPin, BookMarked, ChevronLeft, ChevronRight, Zap, Sparkles, Flame, Users, Brain } from 'lucide-react';
+import { CheckCircle2, MapPin, BookMarked, ChevronLeft, ChevronRight, Zap, Sparkles, Activity, Brain, LogOut } from 'lucide-react';
 
 interface DashboardScreenProps {
   currentDay: number;
@@ -19,12 +18,16 @@ interface DashboardScreenProps {
     hostel: string;
     interests: string[];
   };
+  userEmail?: string;
+  onLogout?: () => void;
 }
 
-export function DashboardScreen({ 
-  currentDay, 
-  setCurrentDay, 
-  userProfile 
+export function DashboardScreen({
+  currentDay,
+  userEmail,
+  onLogout,
+  setCurrentDay,
+  userProfile
 }: DashboardScreenProps) {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'chat' | 'tasks' | 'campus' | 'study'>('dashboard');
   const phase = getPhaseNumber(currentDay);
@@ -51,7 +54,6 @@ export function DashboardScreen({
     }
   };
 
-  // Render active screen
   if (activeTab === 'chat') {
     return <MentorChat currentDay={currentDay} onBack={() => setActiveTab('dashboard')} />;
   }
@@ -66,235 +68,198 @@ export function DashboardScreen({
   }
 
   return (
-    <div className="min-h-screen relative dark:bg-gradient-to-br dark:from-slate-950 dark:to-slate-900 bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Animated background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-40 left-10 w-96 h-96 dark:bg-purple-500/12 bg-purple-500/5 rounded-full blur-3xl animate-float-in"></div>
-        <div className="absolute bottom-40 right-10 w-96 h-96 dark:bg-blue-500/12 bg-blue-500/5 rounded-full blur-3xl animate-float-in" style={{ animationDelay: '1.5s' }}></div>
-        <div className="absolute -top-40 right-40 w-80 h-80 dark:bg-pink-500/10 bg-pink-500/5 rounded-full blur-3xl animate-float-in" style={{ animationDelay: '3s' }}></div>
-      </div>
-
-      {/* Header */}
-      <header className="sticky top-0 z-40 dark:backdrop-blur-2xl dark:border-b dark:border-primary/10 backdrop-blur border-b border-slate-200/50">
-        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-1">
-              <Sparkles className="w-5 h-5 dark:text-primary text-purple-600 shrink-0" />
-              <h1 className="text-2xl md:text-3xl font-bold dark:text-white text-slate-900 truncate">
-                Welcome back, <span className="text-gradient">{userProfile.name}</span>
+    <div className="min-h-screen relative bg-background text-foreground overflow-hidden font-sans">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex-1 min-w-0 flex items-center gap-4">
+             <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+               <Sparkles className="w-5 h-5 text-primary" />
+             </div>
+            <div>
+              <h1 className="text-xl font-display font-bold text-foreground truncate flex items-center gap-2">
+                Mentor <span className="text-muted-foreground font-medium">/</span> <span className="text-primary">{userProfile.name}</span>
               </h1>
+              <p className="text-sm text-muted-foreground">
+                {userProfile.branch}{userProfile.hostel && ` • ${userProfile.hostel}`}
+              </p>
             </div>
-            <p className="text-sm dark:text-gray-300 text-slate-600">
-              {userProfile.branch}{userProfile.hostel && ` • ${userProfile.hostel}`}
-            </p>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="dark:card-flat dark:px-6 dark:py-3 dark:flex dark:items-center dark:gap-2 bg-white/50 dark:bg-slate-800/50 px-6 py-3 flex items-center gap-2 rounded-xl dark:border dark:border-slate-700 border border-slate-200">
-              <Flame className="w-5 h-5 text-red-500" />
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="bg-card border px-4 py-2 flex items-center gap-2.5 rounded-xl shadow-sm">
+              <div className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+              </div>
               <div>
-                <span className="font-bold dark:text-white text-slate-900 text-lg">{currentDay}</span>
-                <span className="text-xs dark:text-gray-400 text-slate-500">/90</span>
+                <span className="font-bold text-foreground text-base">{currentDay}</span>
+                <span className="text-sm text-muted-foreground font-medium ml-1">/ 90</span>
               </div>
             </div>
             <PanicButton />
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                title={userEmail || 'Logout'}
+                className="group relative p-2.5 rounded-xl bg-card border hover:border-destructive hover:bg-destructive/10 hover:text-destructive text-muted-foreground shadow-sm transition-colors"
+              >
+                <LogOut className="w-5 h-5 transition-colors" />
+              </button>
+            )}
           </div>
         </div>
       </header>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-6 py-12">
-        {/* Phase Progress Card */}
-        <GlowingCard glow="purple" className="mb-12 p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 fade-in">
-          <div className="flex-1">
-            <div className="mb-2 inline-flex items-center gap-2 badge-gradient dark:badge-gradient">
-              <Zap className="w-3 h-3" />
-              <span className="text-xs font-semibold dark:text-purple-200 text-purple-700">Phase {phase}</span>
+      <main className="relative z-10 max-w-7xl mx-auto px-6 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        
+        {/* Phase Overview Card */}
+        <div className="bg-card text-card-foreground border p-8 rounded-[2.5rem] shadow-sm hover:shadow-md transition-shadow mb-12">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-10">
+            <div className="flex-1">
+              <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+                <Zap className="w-3.5 h-3.5 text-primary" />
+                <span className="text-xs font-semibold text-primary tracking-wide uppercase">Operational Phase {phase}</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-3 tracking-tight">{phaseTitles[phase]}</h2>
+              <p className="text-muted-foreground max-w-xl text-base md:text-lg">{phaseDescriptions[phase]}</p>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold dark:text-white text-slate-900 mb-2">{phaseTitles[phase]}</h2>
-            <p className="dark:text-gray-300 text-slate-600 max-w-lg">{phaseDescriptions[phase]}</p>
-          </div>
-          <div className="md:text-right">
-            <div className="text-5xl md:text-6xl font-bold text-gradient mb-2">{Math.round(progressPercent)}%</div>
-            <p className="text-sm dark:text-gray-300 text-slate-600">
-              <span className="font-semibold dark:text-white text-slate-900">{90 - currentDay}</span> days remaining
-            </p>
-          </div>
-        </GlowingCard>
-
-        {/* Progress Bar */}
-        <div className="mb-12 fade-in stagger-1">
-          <div className="flex justify-between items-center mb-3">
-            <span className="section-label dark:text-purple-400 text-purple-600">Overall Progress</span>
-            <span className="text-sm font-bold dark:text-primary text-purple-600">{currentDay} of 90</span>
-          </div>
-          <div className="relative h-2 dark:bg-white/5 dark:border-primary/10 dark:border bg-slate-200/50 border border-slate-300/50 rounded-full overflow-hidden">
-            <div
-              className="h-full gradient-primary smooth-transition rounded-full"
-              style={{ width: `${progressPercent}%` }}
-            >
-              <div className="h-full w-full opacity-50 animate-shimmer" style={{
-                backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                backgroundSize: '200% 100%'
-              }}></div>
+            <div className="md:text-right shrink-0">
+              <div className="text-5xl md:text-6xl font-display font-extrabold text-foreground mb-1 tracking-tighter">
+                {Math.round(progressPercent)}<span className="text-3xl text-muted-foreground">%</span>
+              </div>
+              <p className="text-sm text-muted-foreground font-medium">
+                <span className="text-primary font-bold">{90 - currentDay}</span> days remaining
+              </p>
             </div>
           </div>
-          <div className="mt-3 text-xs dark:text-gray-400 text-slate-500">
-            {phase === 1 && 'Days 1-30: Orientation • Building foundation'}
-            {phase === 2 && 'Days 31-60: Growth • Developing skills'}
-            {phase === 3 && 'Days 61-90: Confidence • Polishing yourself'}
+          <div className="mt-10">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Journey Progress</span>
+              <span className="text-xs font-bold text-primary">Day {currentDay}</span>
+            </div>
+            <div className="relative h-2.5 bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full"
+                style={{ width: `${progressPercent}%`, transition: 'width 1s cubic-bezier(0.16, 1, 0.3, 1)' }}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Feature Cards Grid - 4 columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12 fade-in stagger-2">
-          {/* Chat Card */}
+        {/* Action Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <button
             onClick={() => setActiveTab('chat')}
-            className="relative group/card rounded-2xl p-6 text-left smooth-transition hover:-translate-y-1 dark:bg-slate-900/50 dark:border dark:border-slate-700/50 dark:hover:border-purple-500/50 bg-white/50 border border-slate-200/50 hover:border-purple-400"
+            className="group relative rounded-3xl p-6 text-left bg-card border hover:border-primary shadow-sm hover:shadow-md transition-all duration-300"
           >
-            <div className="absolute inset-0 rounded-2xl dark:bg-gradient-to-br dark:from-purple-500/10 dark:to-transparent from-purple-500/5 to-transparent opacity-0 group-hover/card:opacity-100 smooth-transition"></div>
-            <div className="relative z-10">
-              <div className="mb-4 inline-block p-3 rounded-2xl dark:bg-gradient-to-br dark:from-purple-500/20 dark:to-purple-500/5 bg-purple-500/10 group-hover/card:from-purple-500/30 group-hover/card:to-purple-500/15 smooth-transition">
-                <Brain className="w-6 h-6 dark:text-purple-300 text-purple-600" />
-              </div>
-              <h3 className="font-bold dark:text-white text-slate-900 mb-2 group-hover/card:dark:text-purple-300 group-hover/card:text-purple-600 smooth-transition">AI Chat Mentor</h3>
-              <p className="text-xs dark:text-gray-300 text-slate-600">Ask anything anytime</p>
-              <div className="mt-4 flex items-center dark:text-purple-300 text-purple-600 text-xs font-semibold opacity-0 group-hover/card:opacity-100 smooth-transition-fast gap-1">
-                Open <ChevronRight className="w-3 h-3" />
-              </div>
+            <div className="mb-6 inline-flex p-3 rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <Brain className="w-7 h-7 text-primary" />
             </div>
+            <h3 className="text-lg font-bold text-foreground mb-2">AI Mentor Chat</h3>
+            <p className="text-sm text-muted-foreground">Direct link for instant guidance and personalized advice.</p>
           </button>
 
-          {/* Tasks Card */}
           <button
             onClick={() => setActiveTab('tasks')}
-            className="relative group/card rounded-2xl p-6 text-left smooth-transition hover:-translate-y-1 dark:bg-slate-900/50 dark:border dark:border-slate-700/50 dark:hover:border-blue-500/50 bg-white/50 border border-slate-200/50 hover:border-blue-400"
+            className="group relative rounded-3xl p-6 text-left bg-card border hover:border-primary shadow-sm hover:shadow-md transition-all duration-300"
           >
-            <div className="absolute inset-0 rounded-2xl dark:bg-gradient-to-br dark:from-blue-500/10 dark:to-transparent from-blue-500/5 to-transparent opacity-0 group-hover/card:opacity-100 smooth-transition"></div>
-            <div className="relative z-10">
-              <div className="mb-4 inline-block p-3 rounded-2xl dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-blue-500/5 bg-blue-500/10 group-hover/card:from-blue-500/30 group-hover/card:to-blue-500/15 smooth-transition">
-                <CheckCircle2 className="w-6 h-6 dark:text-blue-300 text-blue-600" />
-              </div>
-              <h3 className="font-bold dark:text-white text-slate-900 mb-2 group-hover/card:dark:text-blue-300 group-hover/card:text-blue-600 smooth-transition">Daily Tasks</h3>
-              <p className="text-xs dark:text-gray-300 text-slate-600">Track your wins</p>
-              <div className="mt-4 flex items-center dark:text-blue-300 text-blue-600 text-xs font-semibold opacity-0 group-hover/card:opacity-100 smooth-transition-fast gap-1">
-                Start <ChevronRight className="w-3 h-3" />
-              </div>
+            <div className="mb-6 inline-flex p-3 rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <CheckCircle2 className="w-7 h-7 text-primary" />
             </div>
+            <h3 className="text-lg font-bold text-foreground mb-2">Daily Objectives</h3>
+            <p className="text-sm text-muted-foreground">Track your missions and achieve your daily goals.</p>
           </button>
 
-          {/* Campus Card */}
           <button
             onClick={() => setActiveTab('campus')}
-            className="relative group/card rounded-2xl p-6 text-left smooth-transition hover:-translate-y-1 dark:bg-slate-900/50 dark:border dark:border-slate-700/50 dark:hover:border-pink-500/50 bg-white/50 border border-slate-200/50 hover:border-pink-400"
+            className="group relative rounded-3xl p-6 text-left bg-card border hover:border-primary shadow-sm hover:shadow-md transition-all duration-300"
           >
-            <div className="absolute inset-0 rounded-2xl dark:bg-gradient-to-br dark:from-pink-500/10 dark:to-transparent from-pink-500/5 to-transparent opacity-0 group-hover/card:opacity-100 smooth-transition"></div>
-            <div className="relative z-10">
-              <div className="mb-4 inline-block p-3 rounded-2xl dark:bg-gradient-to-br dark:from-pink-500/20 dark:to-pink-500/5 bg-pink-500/10 group-hover/card:from-pink-500/30 group-hover/card:to-pink-500/15 smooth-transition">
-                <MapPin className="w-6 h-6 dark:text-pink-300 text-pink-600" />
-              </div>
-              <h3 className="font-bold dark:text-white text-slate-900 mb-2 group-hover/card:dark:text-pink-300 group-hover/card:text-pink-600 smooth-transition">Campus Guide</h3>
-              <p className="text-xs dark:text-gray-300 text-slate-600">Explore & navigate</p>
-              <div className="mt-4 flex items-center dark:text-pink-300 text-pink-600 text-xs font-semibold opacity-0 group-hover/card:opacity-100 smooth-transition-fast gap-1">
-                Explore <ChevronRight className="w-3 h-3" />
-              </div>
+            <div className="mb-6 inline-flex p-3 rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <MapPin className="w-7 h-7 text-primary" />
             </div>
+            <h3 className="text-lg font-bold text-foreground mb-2">Ecosystem Map</h3>
+            <p className="text-sm text-muted-foreground">Navigate the physical campus grid natively.</p>
           </button>
 
-          {/* Study Card */}
           <button
             onClick={() => setActiveTab('study')}
-            className="relative group/card rounded-2xl p-6 text-left smooth-transition hover:-translate-y-1 dark:bg-slate-900/50 dark:border dark:border-slate-700/50 dark:hover:border-cyan-500/50 bg-white/50 border border-slate-200/50 hover:border-cyan-400"
+            className="group relative rounded-3xl p-6 text-left bg-card border hover:border-primary shadow-sm hover:shadow-md transition-all duration-300"
           >
-            <div className="absolute inset-0 rounded-2xl dark:bg-gradient-to-br dark:from-cyan-500/10 dark:to-transparent from-cyan-500/5 to-transparent opacity-0 group-hover/card:opacity-100 smooth-transition"></div>
-            <div className="relative z-10">
-              <div className="mb-4 inline-block p-3 rounded-2xl dark:bg-gradient-to-br dark:from-cyan-500/20 dark:to-cyan-500/5 bg-cyan-500/10 group-hover/card:from-cyan-500/30 group-hover/card:to-cyan-500/15 smooth-transition">
-                <BookMarked className="w-6 h-6 dark:text-cyan-300 text-cyan-600" />
-              </div>
-              <h3 className="font-bold dark:text-white text-slate-900 mb-2 group-hover/card:dark:text-cyan-300 group-hover/card:text-cyan-600 smooth-transition">Study Hub</h3>
-              <p className="text-xs dark:text-gray-300 text-slate-600">Learn & succeed</p>
-              <div className="mt-4 flex items-center dark:text-cyan-300 text-cyan-600 text-xs font-semibold opacity-0 group-hover/card:opacity-100 smooth-transition-fast gap-1">
-                Learn <ChevronRight className="w-3 h-3" />
-              </div>
+            <div className="mb-6 inline-flex p-3 rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <BookMarked className="w-7 h-7 text-primary" />
             </div>
+            <h3 className="text-lg font-bold text-foreground mb-2">Study Archives</h3>
+            <p className="text-sm text-muted-foreground">Access your academic logs and premium core databases.</p>
           </button>
         </div>
 
-        {/* Motivation & Tips Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 fade-in stagger-3">
-          {/* Tip Card */}
-          <GlowingCard glow="purple" className="p-8">
+        {/* Intelligence Feeds */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          <div className="bg-card border rounded-[2rem] p-8 shadow-sm">
             <div className="flex items-start gap-4">
-              <div className="p-4 rounded-2xl dark:bg-gradient-to-br dark:from-purple-500/20 dark:to-purple-500/5 bg-purple-500/10 shrink-0">
-                <Sparkles className="w-6 h-6 dark:text-purple-300 text-purple-600" />
+              <div className="p-3 rounded-2xl bg-primary/10 shrink-0">
+                <Sparkles className="w-6 h-6 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold dark:text-white text-slate-900 mb-3 text-sm">💡 Senior Bhaiya's Tip</h3>
-                <p className="text-sm dark:text-gray-300 text-slate-600 leading-relaxed">{tip}</p>
+                <h3 className="font-bold text-foreground mb-2 text-sm uppercase tracking-wider">Transmission Received</h3>
+                <p className="text-muted-foreground leading-relaxed italic border-l-2 border-primary/50 pl-4 py-1">" {tip} "</p>
               </div>
             </div>
-          </GlowingCard>
+          </div>
 
-          {/* Quote Card */}
-          <GlowingCard glow="blue" className="p-8">
+          <div className="bg-card border rounded-[2rem] p-8 shadow-sm">
             <div className="flex items-start gap-4">
-              <div className="p-4 rounded-2xl dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-blue-500/5 bg-blue-500/10 shrink-0">
-                <Users className="w-6 h-6 dark:text-blue-300 text-blue-600" />
+              <div className="p-3 rounded-2xl bg-primary/10 shrink-0">
+                <Activity className="w-6 h-6 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold dark:text-white text-slate-900 mb-3 text-sm">✨ Daily Inspiration</h3>
-                <p className="text-sm dark:text-gray-300 text-slate-600 leading-relaxed italic">{quote}</p>
+                <h3 className="font-bold text-foreground mb-2 text-sm uppercase tracking-wider">System Directive</h3>
+                <p className="text-muted-foreground leading-relaxed font-medium border-l-2 border-primary/50 pl-4 py-1">{quote}</p>
               </div>
             </div>
-          </GlowingCard>
+          </div>
         </div>
 
-        {/* Day Navigation */}
-        <GlowingCard glow="pink" className="p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-12 fade-in stagger-4">
+        {/* Time Controls */}
+        <div className="bg-card border rounded-[2rem] p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
           <div>
-            <h3 className="font-bold dark:text-white text-slate-900 mb-1">Your 90-Day Journey</h3>
-            <p className="text-sm dark:text-gray-300 text-slate-600">
-              You're on <span className="dark:text-purple-300 text-purple-600 font-bold">Day {currentDay}</span> •
-              {phase === 1 && ' Orientation Phase'}
-              {phase === 2 && ' Growth Phase'}
-              {phase === 3 && ' Confidence Phase'}
+            <h3 className="font-display font-bold text-xl text-foreground mb-1">Time Controls</h3>
+            <p className="text-sm text-muted-foreground font-medium">
+              Logging Day <span className="text-primary font-bold">{currentDay}</span> of 90
             </p>
           </div>
-          <div className="flex gap-3 w-full md:w-auto">
+          <div className="flex gap-4 w-full md:w-auto">
             <button
               onClick={handlePreviousDay}
               disabled={currentDay === 1}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl dark:bg-slate-800/50 dark:border dark:border-slate-700 dark:hover:border-purple-500/50 dark:disabled:opacity-50 dark:disabled:cursor-not-allowed bg-white/50 border border-slate-200/50 hover:border-purple-400 disabled:opacity-50 disabled:cursor-not-allowed smooth-transition hover:-translate-y-0.5"
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-background border hover:bg-accent text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold shadow-sm"
             >
-              <ChevronLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Previous</span>
+              <ChevronLeft className="w-5 h-5" />
+              <span className="hidden sm:inline">Regress</span>
             </button>
             <button
               onClick={handleNextDay}
               disabled={currentDay === 90}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl btn-gradient disabled:opacity-50 disabled:cursor-not-allowed btn-pulse"
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold shadow-sm"
             >
-              <span className="hidden sm:inline">Next</span>
-              <ChevronRight className="w-4 h-4" />
+              <span className="hidden sm:inline">Advance Cycle</span>
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
-        </GlowingCard>
+        </div>
 
         {currentDay === 90 && (
-          <div className="relative rounded-2xl p-12 text-center dark:bg-slate-900/50 dark:border dark:border-pink-500/20 bg-white/50 border border-pink-300/50 fade-in">
-            <div className="absolute inset-0 rounded-2xl dark:bg-gradient-to-br dark:from-pink-500/10 dark:to-transparent from-pink-500/5 to-transparent"></div>
-            <div className="relative z-10">
-              <div className="text-8xl mb-6 animate-float-in">🎉</div>
-              <h2 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 dark:from-purple-400 dark:via-pink-500 dark:to-blue-500 mb-4">
-                You've Completed 90 Days!
-              </h2>
-              <p className="text-lg dark:text-gray-300 text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-                What an incredible journey! You've grown from a nervous fresher to a confident, adapted student. Now it's time to pay it forward and help other freshers navigate their first 90 days!
-              </p>
-              <button className="btn-gradient inline-flex items-center gap-2 px-8 py-4 btn-pulse">
-                Share Your Story
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+          <div className="mt-12 rounded-[2.5rem] p-16 text-center border bg-card shadow-lg">
+            <div className="text-8xl mb-6">🏆</div>
+            <h2 className="text-4xl md:text-5xl font-display font-extrabold text-foreground mb-4 tracking-tight">
+              Calibration Complete
+            </h2>
+            <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+              Simulation ended. You have successfully adapted to the campus ecosystem. Retain system logs, share your data packet, and proceed to Year 2 protocols.
+            </p>
+            <button className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-semibold shadow-sm hover:shadow-md hover:bg-primary/90 transition-all">
+              Broadcast Achievement
+              <Sparkles className="w-4 h-4" />
+            </button>
           </div>
         )}
       </main>

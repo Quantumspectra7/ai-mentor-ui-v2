@@ -92,7 +92,6 @@ export function BranchExplorer({ onBack }: BranchExplorerProps) {
                   </div>
 
                   <Button
-                    fullWidth
                     variant="outline"
                     className="w-full mt-4 border-amber-500/40 text-amber-100 hover:bg-amber-500/10"
                   >

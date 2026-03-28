@@ -14,78 +14,76 @@ export function StudyHelper({ onBack }: StudyHelperProps) {
   const subject = studyResources[selectedSubject];
 
   return (
-    <div className="min-h-screen bg-background relative">
-      {/* Background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-10 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-80 h-80 bg-secondary/5 rounded-full blur-3xl"></div>
-      </div>
+    <div className="min-h-screen bg-background relative font-sans text-foreground">
 
       {/* Header */}
-      <div className="glass-accent sticky top-0 z-40 border-b border-primary/10">
-        <div className="max-w-4xl mx-auto px-4 py-5 flex items-center gap-4">
+      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
           <button
             onClick={onBack}
-            className="p-2 rounded-lg glass smooth-transition hover:border-primary/40"
+            className="p-2 bg-card border shrink-0 rounded-xl hover:bg-accent hover:border-accent-foreground/20 transition-all shadow-sm"
           >
-            <ArrowLeft className="w-5 h-5 text-white" />
+            <ArrowLeft className="w-5 h-5 text-foreground" />
           </button>
-          <div>
-            <h1 className="text-2xl font-bold text-white">Study Helper</h1>
-            <p className="text-sm text-gray-400">Master subjects with guided learning paths</p>
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-bold font-display tracking-tight text-foreground truncate">Study Helper</h1>
+            <p className="text-xs md:text-sm text-muted-foreground font-medium truncate">Master subjects with guided learning paths</p>
           </div>
         </div>
       </div>
 
-      <main className="relative z-10 max-w-4xl mx-auto px-4 py-12">
+      <main className="relative z-10 max-w-4xl mx-auto px-6 py-12">
         {/* Subject Selection */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12 animate-fade-up">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-14 animate-in fade-in slide-in-from-bottom-4">
           {Object.entries(studyResources).map(([key, value], idx) => (
             <button
               key={key}
               onClick={() => setSelectedSubject(key as keyof typeof studyResources)}
-              style={{ animationDelay: `${idx * 0.05}s` }}
-              className={`glass-accent rounded-2xl p-6 smooth-transition text-left group ${
+              className={`bg-card text-left p-6 md:p-8 rounded-3xl border transition-all group shadow-sm hover:shadow-md ${
                 selectedSubject === key
-                  ? 'border-primary/50 bg-primary/10'
-                  : 'border-primary/10 hover:border-primary/30'
+                  ? 'border-primary ring-1 ring-primary/20 bg-primary/5'
+                  : 'border-input hover:border-primary/40 hover:bg-accent'
               }`}
             >
-              <div className={`p-3 rounded-lg mb-4 w-fit ${selectedSubject === key ? 'bg-primary/20' : 'bg-primary/10 group-hover:bg-primary/20'} smooth-transition`}>
-                <BookOpen className={`w-6 h-6 ${selectedSubject === key ? 'text-primary' : 'text-primary/60'}`} />
+              <div className={`p-3.5 rounded-2xl mb-5 w-fit border transition-colors shadow-sm ${selectedSubject === key ? 'bg-primary text-primary-foreground border-transparent' : 'bg-background border-input text-muted-foreground group-hover:text-primary group-hover:border-primary/30'}`}>
+                <BookOpen className="w-6 h-6" />
               </div>
-              <h3 className="font-semibold text-white group-hover:text-primary smooth-transition">{value.title}</h3>
-              <p className="text-xs text-gray-400 mt-2">{value.topics.length} topics</p>
+              <h3 className={`text-xl font-bold transition-colors ${selectedSubject === key ? 'text-primary' : 'text-foreground group-hover:text-primary'}`}>{value.title}</h3>
+              <p className="text-sm font-semibold text-muted-foreground mt-2 uppercase tracking-widest">{value.topics.length} topics</p>
             </button>
           ))}
         </div>
 
-        {/* Topics */}
-        <div className="glass-accent rounded-3xl p-10 mb-12 animate-fade-up" style={{ animationDelay: '0.1s' }}>
-          <h2 className="text-3xl font-bold text-white mb-8">{subject.title}</h2>
+        {/* Topics Content */}
+        <div className="bg-card border shadow-sm rounded-3xl p-8 md:p-12 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <h2 className="text-4xl md:text-5xl font-display font-extrabold text-foreground mb-10 tracking-tight">{subject.title}</h2>
 
-          <div className="mb-10">
-            <h3 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-              <Target className="w-5 h-5 text-primary" />
-              Topics to Master
+          <div className="mb-12">
+            <h3 className="text-lg font-bold text-foreground mb-6 flex items-center gap-3">
+               <div className="p-2 shrink-0 bg-primary/10 rounded-lg text-primary border border-primary/20">
+                  <Target className="w-5 h-5" />
+               </div>
+               Topics to Master
             </h3>
-            <div className="space-y-3">
+            
+            <div className="space-y-4 pl-2 md:pl-0">
               {subject.topics.map((topic, index) => (
-                <div key={index} className="glass rounded-2xl p-5 hover:border-primary/40 smooth-transition group">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-semibold group-hover:bg-primary/30 smooth-transition">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-white group-hover:text-primary smooth-transition">{topic.name}</h4>
-                      <div className="flex gap-3 mt-3 text-xs">
-                        <span className="px-3 py-1 rounded-full bg-secondary/20 text-secondary font-medium">
-                          {topic.difficulty}
-                        </span>
-                        <span className="px-3 py-1 rounded-full bg-accent/20 text-accent font-medium">
-                          {topic.time}
-                        </span>
+                <div key={index} className="bg-background border rounded-2xl p-5 md:p-6 hover:shadow-md hover:border-primary/40 transition-all group">
+                  <div className="flex flex-col md:flex-row md:items-center gap-4">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-extrabold group-hover:bg-primary group-hover:text-primary-foreground transition-colors shadow-sm">
+                        {index + 1}
                       </div>
+                      <h4 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">{topic.name}</h4>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-3 mt-3 md:mt-0 ml-14 md:ml-0 shrink-0">
+                      <span className="px-3.5 py-1.5 rounded-lg border bg-card text-xs font-bold text-muted-foreground shadow-sm">
+                        {topic.difficulty}
+                      </span>
+                      <span className="px-3.5 py-1.5 rounded-lg border bg-primary/10 border-primary/20 text-primary text-xs font-bold shadow-sm">
+                        {topic.time}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -93,52 +91,59 @@ export function StudyHelper({ onBack }: StudyHelperProps) {
             </div>
           </div>
 
-          {/* Tips */}
-          <div className="mb-10 p-6 rounded-2xl glass-accent border-primary/20">
-            <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
-              <Lightbulb className="w-5 h-5 text-primary" />
-              Senior Tip
-            </h3>
-            <p className="text-gray-300 leading-relaxed">{subject.tips}</p>
-          </div>
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Tips */}
+            <div className="p-8 rounded-3xl bg-background border shadow-sm">
+              <h3 className="font-bold text-foreground mb-4 flex items-center gap-3">
+                 <div className="p-2 shrink-0 bg-yellow-500/10 rounded-lg text-yellow-600 border border-yellow-500/20">
+                    <Lightbulb className="w-5 h-5" />
+                 </div>
+                 Senior Tip
+              </h3>
+              <p className="text-sm font-medium text-muted-foreground leading-relaxed italic border-l-2 border-primary/40 pl-4">{subject.tips}</p>
+            </div>
 
-          {/* Platforms */}
-          <div>
-            <h3 className="font-semibold text-white mb-4">Recommended Learning Platforms</h3>
-            <div className="flex flex-wrap gap-3">
-              {subject.platforms.map((platform, index) => (
-                <button
-                  key={index}
-                  className="px-4 py-2 rounded-lg glass smooth-transition hover:border-primary/40 font-medium text-sm text-white"
-                >
-                  {platform}
-                </button>
-              ))}
+            {/* Platforms */}
+            <div className="p-8 rounded-3xl bg-background border shadow-sm">
+                <h3 className="font-bold text-foreground mb-4">Recommended Learning Platforms</h3>
+                <div className="flex flex-wrap gap-2.5">
+                  {subject.platforms.map((platform, index) => (
+                    <span
+                      key={index}
+                      className="px-4 py-2 bg-card border rounded-lg text-xs font-bold text-foreground shadow-sm hover:border-primary/40 hover:bg-accent transition-colors"
+                    >
+                      {platform}
+                    </span>
+                  ))}
+                </div>
             </div>
           </div>
         </div>
 
-        {/* Study Tips Card */}
-        <div className="glass-accent rounded-3xl p-10 border-secondary/20 animate-fade-up" style={{ animationDelay: '0.2s' }}>
-          <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-2">
-            <Zap className="w-6 h-6 text-accent" />
-            Study Techniques That Work
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              { icon: '⏰', title: 'Pomodoro Technique', desc: '25 min study, 5 min break' },
-              { icon: '📝', title: 'Active Learning', desc: 'Write, teach, solve problems' },
-              { icon: '👥', title: 'Study Groups', desc: 'Learn faster together' },
-              { icon: '🔄', title: 'Spaced Repetition', desc: 'Review over days/weeks' }
-            ].map((tip, idx) => (
-              <div key={idx} className="glass rounded-2xl p-5 hover:border-primary/40 smooth-transition group">
-                <p className="text-3xl mb-3">{tip.icon}</p>
-                <p className="font-semibold text-white group-hover:text-primary smooth-transition">{tip.title}</p>
-                <p className="text-sm text-gray-400 mt-2">{tip.desc}</p>
+        {/* Study Tips Cards */}
+        <div className="mb-12">
+            <h3 className="text-2xl font-display font-bold text-foreground mb-6 flex items-center gap-3 animate-in fade-in">
+              <div className="p-2 shrink-0 bg-blue-500/10 rounded-xl text-blue-500 border border-blue-500/20">
+                 <Zap className="w-6 h-6" />
               </div>
-            ))}
-          </div>
+              Study Techniques That Work
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              {[
+                { icon: '⏰', title: 'Pomodoro Technique', desc: '25 min study, 5 min break', color: 'orange' },
+                { icon: '📝', title: 'Active Learning', desc: 'Write, teach, solve problems', color: 'blue' },
+                { icon: '👥', title: 'Study Groups', desc: 'Learn faster together', color: 'purple' },
+                { icon: '🔄', title: 'Spaced Repetition', desc: 'Review over days/weeks', color: 'emerald' }
+              ].map((tip, idx) => (
+                <div key={idx} className="bg-card border rounded-2xl p-6 hover:shadow-md hover:-translate-y-1 transition-all group">
+                  <div className="text-3xl mb-4 p-3 bg-background rounded-xl border w-fit shadow-sm group-hover:scale-110 transition-transform">{tip.icon}</div>
+                  <h4 className="font-bold text-foreground mb-2 group-hover:text-primary transition-colors">{tip.title}</h4>
+                  <p className="text-xs font-medium text-muted-foreground leading-relaxed">{tip.desc}</p>
+                </div>
+              ))}
+            </div>
         </div>
+
       </main>
     </div>
   );

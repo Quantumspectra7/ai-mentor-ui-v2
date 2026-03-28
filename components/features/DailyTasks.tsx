@@ -31,6 +31,15 @@ export function DailyTasks({ currentDay, onBack }: DailyTasksProps) {
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
 
   useEffect(() => {
+    const savedMap = localStorage.getItem('tasksByDay');
+    if (savedMap) {
+      const parsed = JSON.parse(savedMap) as Record<string, string[]>;
+      if (parsed[String(currentDay)]) {
+        setCompletedTasks(parsed[String(currentDay)]);
+        return;
+      }
+    }
+
     const saved = localStorage.getItem(`tasksDay${currentDay}`);
     if (saved) setCompletedTasks(JSON.parse(saved));
   }, [currentDay]);
@@ -47,6 +56,27 @@ export function DailyTasks({ currentDay, onBack }: DailyTasksProps) {
       : [...completedTasks, taskId];
     setCompletedTasks(updated);
     localStorage.setItem(`tasksDay${currentDay}`, JSON.stringify(updated));
+
+    const existing = localStorage.getItem('tasksByDay');
+    const tasksByDay = existing ? JSON.parse(existing) as Record<string, string[]> : {};
+    tasksByDay[String(currentDay)] = updated;
+    localStorage.setItem('tasksByDay', JSON.stringify(tasksByDay));
+
+    const authId = localStorage.getItem('userAuthId');
+    const email = localStorage.getItem('userEmail');
+    if (authId || email) {
+      fetch('/api/auth/update-progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          authId,
+          email,
+          progress: { tasksByDay },
+        }),
+      }).catch((error) => {
+        console.error('Failed to persist tasks:', error);
+      });
+    }
   };
 
   const completionPercent = selectedTasks.length
@@ -54,38 +84,48 @@ export function DailyTasks({ currentDay, onBack }: DailyTasksProps) {
     : 0;
 
   return (
-    <div className="min-h-screen bg-background relative">
-      {/* Background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-40 left-10 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse-glow"></div>
-        <div className="absolute bottom-40 right-10 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '1.5s' }}></div>
-      </div>
+    <div className="min-h-screen bg-background relative font-sans text-foreground">
 
       {/* Header */}
-      <div className="sticky top-0 z-40 backdrop-blur-xl border-b border-primary/10">
-        <div className="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between gap-4">
+      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <button
               onClick={onBack}
-              className="p-2 rounded-xl card-flat hover:border-primary/40 smooth-transition shrink-0"
+              className="p-2 rounded-xl bg-card border hover:bg-accent text-foreground transition-colors shrink-0 shadow-sm"
             >
-              <ArrowLeft className="w-5 h-5 text-white" />
+              <ArrowLeft className="w-5 h-5" />
             </button>
-            <div className="min-w-0">
-              <h1 className="text-xl md:text-2xl font-bold text-white truncate">Today's Tasks</h1>
-              <p className="text-xs md:text-sm text-gray-400">Day {currentDay} of your journey</p>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl md:text-2xl font-bold truncate">Daily Objectives</h1>
+              <p className="text-xs md:text-sm text-muted-foreground font-medium">Day {currentDay} of your journey</p>
             </div>
           </div>
-          <div className="card-flat px-6 py-3 text-center shrink-0">
-            <p className="text-3xl font-bold text-purple-300">{Math.round(completionPercent)}%</p>
-            <p className="text-xs text-gray-400 mt-1">Complete</p>
+          <div className="bg-card border px-4 py-2 rounded-xl text-center shrink-0 shadow-sm">
+            <p className="text-2xl font-bold text-primary">{Math.round(completionPercent)}%</p>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Complete</p>
           </div>
         </div>
       </div>
 
-      <main className="relative z-10 max-w-4xl mx-auto px-6 py-12">
+      <main className="relative z-10 max-w-4xl mx-auto px-6 py-10">
+        
+        {/* Progress Bar Header */}
+        <div className="mb-10 animate-in fade-in slide-in-from-bottom-2">
+           <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-semibold text-foreground">Daily Progress</span>
+              <span className="text-sm font-bold text-primary">{Math.round(completionPercent)}%</span>
+            </div>
+            <div className="relative h-3 bg-muted rounded-full overflow-hidden shadow-inner">
+              <div
+                className="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
+                style={{ width: `${completionPercent}%` }}
+              />
+            </div>
+        </div>
+
         {/* Task List */}
-        <div className="space-y-3 mb-12 animate-fade-up">
+        <div className="space-y-4 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {selectedTasks.map((task, index) => {
             const taskId = `${currentDay}-${index}`;
             const isCompleted = completedTasks.includes(taskId);
@@ -93,38 +133,39 @@ export function DailyTasks({ currentDay, onBack }: DailyTasksProps) {
               <button
                 key={index}
                 onClick={() => toggleTask(index)}
-                className={`w-full card-premium p-6 smooth-transition text-left group hover-lift border ${
+                className={`w-full p-6 text-left group rounded-2xl border transition-all shadow-sm hover:shadow-md ${
                   isCompleted
-                    ? 'border-primary/30 bg-gradient-to-r from-primary/10 to-transparent'
-                    : 'border-primary/10 hover:border-primary/30'
+                    ? 'border-primary bg-primary/5'
+                    : 'bg-card border-input hover:border-primary/50'
                 }`}
               >
                 <div className="flex items-start gap-4">
-                  <div className={`p-2 rounded-lg smooth-transition shrink-0 ${
+                  <div className={`p-1.5 rounded-full shrink-0 transition-colors ${
                     isCompleted
-                      ? 'bg-gradient-primary text-white'
-                      : 'bg-white/5 group-hover:bg-primary/20'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-background border-2 border-muted-foreground/30 text-transparent group-hover:border-primary/50'
                   }`}>
                     {isCompleted ? (
                       <CheckCircle2 className="w-6 h-6" />
                     ) : (
-                      <div className="w-6 h-6 border-2 border-primary/40 rounded-full group-hover:border-primary/60 smooth-transition" />
+                      <div className="w-6 h-6 rounded-full" />
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`font-semibold text-lg smooth-transition ${
+                  <div className="flex-1 min-w-0 pt-0.5">
+                    <p className={`font-semibold text-lg transition-colors ${
                       isCompleted
-                        ? 'line-through text-gray-500'
-                        : 'text-white group-hover:text-primary'
+                        ? 'text-muted-foreground line-through decoration-muted-foreground/50'
+                        : 'text-foreground group-hover:text-primary'
                     }`}>
                       {task.title}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1 capitalize flex items-center gap-2">
-                      {categoryEmojis[task.category]} {task.category}
-                    </p>
+                    <div className="inline-flex mt-2 items-center gap-1.5 px-2.5 py-1 rounded-md bg-accent text-xs font-semibold text-accent-foreground uppercase tracking-wider">
+                      <span>{categoryEmojis[task.category]}</span>
+                      {task.category}
+                    </div>
                   </div>
-                  <span className="text-3xl group-hover:scale-125 smooth-transform shrink-0">
-                    {categoryEmojis[task.category] || '✓'}
+                  <span className="text-3xl opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all shrink-0">
+                    {categoryEmojis[task.category] || '🎯'}
                   </span>
                 </div>
               </button>
@@ -133,59 +174,45 @@ export function DailyTasks({ currentDay, onBack }: DailyTasksProps) {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12 animate-fade-up" style={{ animationDelay: '0.1s' }}>
-          <div className="card-premium p-8 border-0 text-center hover-lift">
-            <div className="inline-block p-4 rounded-2xl bg-gradient-to-br from-red-500/20 to-red-500/5 mb-4">
-              <Flame className="w-6 h-6 text-red-400" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="bg-card border p-8 rounded-3xl text-center shadow-sm hover:scale-[1.02] transition-transform">
+            <div className="inline-flex p-4 rounded-2xl bg-orange-500/10 mb-4 border border-orange-500/20">
+              <Flame className="w-7 h-7 text-orange-500" />
             </div>
-            <p className="section-label mb-2">Streak</p>
-            <p className="text-4xl font-bold text-red-400">{currentDay}</p>
-            <p className="text-xs text-gray-400 mt-2">days consistent</p>
+            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-2">Streak</p>
+            <p className="text-4xl font-display font-extrabold text-foreground">{currentDay}</p>
+            <p className="text-xs text-muted-foreground font-medium mt-2">days consistent</p>
           </div>
 
-          <div className="card-premium p-8 border-0 text-center hover-lift">
-            <div className="inline-block p-4 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 mb-4">
-              <Star className="w-6 h-6 text-blue-400" />
+          <div className="bg-card border p-8 rounded-3xl text-center shadow-sm hover:scale-[1.02] transition-transform">
+            <div className="inline-flex p-4 rounded-2xl bg-blue-500/10 mb-4 border border-blue-500/20">
+              <Star className="w-7 h-7 text-blue-500" />
             </div>
-            <p className="section-label mb-2">Tasks Today</p>
-            <p className="text-4xl font-bold text-blue-400">{selectedTasks.length}</p>
-            <p className="text-xs text-gray-400 mt-2">to complete</p>
+            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-2">Tasks Today</p>
+            <p className="text-4xl font-display font-extrabold text-foreground">{selectedTasks.length}</p>
+            <p className="text-xs text-muted-foreground font-medium mt-2">to complete</p>
           </div>
 
-          <div className="card-premium p-8 border-0 text-center hover-lift">
-            <div className="inline-block p-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 mb-4">
-              <Zap className="w-6 h-6 text-purple-400" />
+          <div className="bg-card border p-8 rounded-3xl text-center shadow-sm hover:scale-[1.02] transition-transform">
+            <div className="inline-flex p-4 rounded-2xl bg-primary/10 mb-4 border border-primary/20">
+              <Zap className="w-7 h-7 text-primary" />
             </div>
-            <p className="section-label mb-2">Completed</p>
-            <p className="text-4xl font-bold text-purple-400">{completedTasks.length}</p>
-            <p className="text-xs text-gray-400 mt-2">tasks done</p>
+            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-2">Completed</p>
+            <p className="text-4xl font-display font-extrabold text-foreground">{completedTasks.length}</p>
+            <p className="text-xs text-muted-foreground font-medium mt-2">tasks done</p>
           </div>
         </div>
 
         {/* Achievement Card */}
         {completionPercent === 100 && (
-          <div className="card-premium p-8 border-0 text-center bg-gradient-to-r from-purple-500/10 to-blue-500/10 mb-12 animate-bounce-subtle">
-            <Trophy className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-white mb-2">Perfect Day! 🎉</h3>
-            <p className="text-gray-300 mb-4">You've completed all tasks for today. Keep it up!</p>
-            <div className="h-1 w-16 gradient-primary rounded-full mx-auto"></div>
+          <div className="bg-card border border-primary/30 p-10 rounded-3xl text-center mb-12 shadow-md animate-in zoom-in-95 duration-500">
+            <Trophy className="w-14 h-14 text-yellow-500 mx-auto mb-5 animate-bounce" />
+            <h3 className="text-3xl font-display font-bold text-foreground mb-3 tracking-tight">Perfect Day! 🎉</h3>
+            <p className="text-muted-foreground text-lg mb-6">You've completed all tasks for today. Keep up the momentum!</p>
+            <div className="h-1.5 w-16 bg-primary rounded-full mx-auto" />
           </div>
         )}
 
-        {/* Motivational Message */}
-        <div className="card-premium p-8 border-0 text-center animate-fade-up" style={{ animationDelay: '0.2s' }}>
-          {completionPercent < 50 ? (
-            <>
-              <p className="text-xl font-bold text-white mb-2">You've got this! 💪</p>
-              <p className="text-gray-300">Complete your tasks one by one. Small steps lead to big wins!</p>
-            </>
-          ) : completionPercent < 100 ? (
-            <>
-              <p className="text-xl font-bold text-white mb-2">Almost there! 🏃</p>
-              <p className="text-gray-300">Just {selectedTasks.length - completedTasks.length} more task{selectedTasks.length - completedTasks.length !== 1 ? 's' : ''} to go!</p>
-            </>
-          ) : null}
-        </div>
       </main>
     </div>
   );

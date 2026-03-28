@@ -2,31 +2,32 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Sparkles, BookOpen, MessageSquare, TrendingUp, ArrowRight, Zap, Users, Brain } from 'lucide-react';
-import { GlowingCard, AnimatedCard } from '@/components/ui/animated-components';
-import { CardContainer, CardBody, CardItem } from '@/components/ui/3d-card';
+import { Sparkles, BookOpen, TrendingUp, ArrowRight, Zap, Brain, Loader2 } from 'lucide-react';
+
+const INTEREST_OPTIONS = ['Coding', 'Design', 'Core', 'Robotics', 'Sports', 'Arts'];
 
 interface LandingScreenProps {
+  mode?: 'landing' | 'onboarding';
+  onStartJourney?: () => void;
+  onBackFromOnboarding?: () => void;
   onStart: (profile: {
     name: string;
     branch: string;
     hostel: string;
     interests: string[];
+    extracurricular: string;
   }) => void;
 }
 
-export function LandingScreen({ onStart }: LandingScreenProps) {
-  const [showOnboarding, setShowOnboarding] = useState(false);
+export function LandingScreen({ mode = 'landing', onStartJourney, onBackFromOnboarding, onStart }: LandingScreenProps) {
   const [name, setName] = useState('');
   const [branch, setBranch] = useState('');
   const [hostel, setHostel] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
-
-  const interestOptions = ['Coding', 'Design', 'Core', 'Robotics', 'Sports', 'Arts'];
+  const [extracurricular, setExtracurricular] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const isOnboarding = mode === 'onboarding';
 
   const toggleInterest = (interest: string) => {
     setInterests(prev => 
@@ -36,36 +37,69 @@ export function LandingScreen({ onStart }: LandingScreenProps) {
     );
   };
 
-  const handleStart = () => {
+  const handleStart = async () => {
     if (name && branch) {
-      onStart({
-        name,
-        branch,
-        hostel,
-        interests
-      });
+      setIsSaving(true);
+      
+      try {
+        const userEmail = localStorage.getItem('userEmail');
+        const userAuthId = localStorage.getItem('userAuthId');
+        
+        await fetch('/api/auth/save-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: userEmail,
+            authId: userAuthId,
+            name,
+            branch,
+            hostel,
+            interests,
+            extracurricular,
+            progress: {
+              currentDay: 1,
+              mentorState: 'dashboard',
+              lpuState: localStorage.getItem('lpuState')
+                ? JSON.parse(localStorage.getItem('lpuState') as string)
+                : null,
+            },
+          }),
+        });
+
+        onStart?.({
+          name,
+          branch,
+          hostel,
+          interests,
+          extracurricular
+        });
+      } catch (error) {
+        console.error('Failed to save profile:', error);
+        onStart?.({
+          name,
+          branch,
+          hostel,
+          interests,
+          extracurricular
+        });
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
-  if (!showOnboarding) {
+  if (!isOnboarding) {
     return (
-      <div className="min-h-screen relative overflow-hidden grain-overlay">
-        {/* Background gradient orbs */}
+      <div className="min-h-screen relative bg-background text-foreground overflow-hidden">
+        {/* Crisp Grid Background */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-br from-amber-400/15 to-amber-400/0 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-tl from-teal-400/15 to-teal-400/0 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-gradient-to-t from-rose-400/10 to-rose-400/0 rounded-full blur-3xl"></div>
-        </div>
-
-        {/* Animated grid background */}
-        <div className="absolute inset-0 opacity-20 dark:opacity-10 pointer-events-none">
-          <svg className="w-full h-full" {...{ 'xmlns': 'http://www.w3.org/2000/svg' }}>
+          <svg className="w-full h-full opacity-[0.03] dark:opacity-[0.05]" {...{ 'xmlns': 'http://www.w3.org/2000/svg' }}>
             <defs>
-              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+              <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+                <path d="M 32 0 L 0 0 0 32" fill="none" stroke="currentColor" strokeWidth="1"/>
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" className="dark:text-primary/5 text-primary/10"/>
+            <rect width="100%" height="100%" fill="url(#grid)" />
           </svg>
         </div>
 
@@ -73,76 +107,69 @@ export function LandingScreen({ onStart }: LandingScreenProps) {
         <div className="relative z-10 flex items-center justify-center min-h-screen px-4 py-12">
           <div className="max-w-5xl mx-auto w-full">
             {/* Hero Section */}
-            <div className="text-center space-y-8 mb-20">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-amber-500/30 bg-black/40">
-                <Sparkles className="w-4 h-4 text-amber-300" />
-                <span className="text-xs font-semibold text-amber-100">Introducing Your AI Mentor</span>
+            <div className="text-center space-y-8 mb-20 mt-12">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border bg-card shadow-sm">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="text-xs font-semibold text-foreground tracking-wide uppercase">Introducing Your AI Mentor</span>
               </div>
 
-              {/* Main Heading */}
-              <div className="space-y-4">
-                <h1 className="font-display hero-title text-5xl md:text-7xl text-balance leading-tight text-amber-50">
-                  <span>Master Your</span>
-                  <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-rose-300 to-teal-300">First 90 Days</span>
+              <div className="space-y-6">
+                <h1 className="font-display font-bold text-5xl md:text-7xl tracking-tight text-balance leading-tight text-foreground">
+                  Master Your<br />
+                  <span className="text-primary">First 90 Days</span>
                 </h1>
-                <p className="text-base md:text-lg text-amber-100/70 max-w-2xl mx-auto leading-relaxed font-light">
+                <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                   Your personal AI mentor guides you through campus life with real advice, daily tasks, and emotional support. From orientation to confidence, we've got you covered.
                 </p>
               </div>
 
-              {/* Features Grid - Three columns */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8">
-                {/* Feature 1 */}
-                <GlowingCard glow="purple">
-                  <div className="mb-4 inline-flex p-3 rounded-2xl bg-amber-500/20">
-                    <Brain className="w-6 h-6 text-amber-300" />
+              {/* Features Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12">
+                <div className="bg-card border rounded-3xl p-8 text-left shadow-sm hover:shadow-md transition-shadow">
+                  <div className="mb-6 inline-flex p-3 rounded-2xl bg-primary/10 border border-primary/20">
+                    <Brain className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold text-amber-50 mb-2">AI Mentor Chat</h3>
-                  <p className="text-sm text-amber-100/70">Get instant personalized advice on academics, campus life, and personal growth</p>
-                </GlowingCard>
+                  <h3 className="text-xl font-bold mb-3">AI Mentor Chat</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">Get instant personalized advice on academics, campus life, and personal growth.</p>
+                </div>
 
-                {/* Feature 2 */}
-                <GlowingCard glow="blue">
-                  <div className="mb-4 inline-flex p-3 rounded-2xl bg-teal-500/20">
-                    <BookOpen className="w-6 h-6 text-teal-200" />
+                <div className="bg-card border rounded-3xl p-8 text-left shadow-sm hover:shadow-md transition-shadow">
+                  <div className="mb-6 inline-flex p-3 rounded-2xl bg-primary/10 border border-primary/20">
+                    <BookOpen className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold text-amber-50 mb-2">Campus & Study Hub</h3>
-                  <p className="text-sm text-amber-100/70">Navigate campus, find resources, and discover how to excel in your studies</p>
-                </GlowingCard>
+                  <h3 className="text-xl font-bold mb-3">Campus & Study Hub</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">Navigate campus, find resources, and discover how to excel in your studies.</p>
+                </div>
 
-                {/* Feature 3 */}
-                <GlowingCard glow="pink">
-                  <div className="mb-4 inline-flex p-3 rounded-2xl bg-rose-500/20">
-                    <TrendingUp className="w-6 h-6 text-rose-200" />
+                <div className="bg-card border rounded-3xl p-8 text-left shadow-sm hover:shadow-md transition-shadow">
+                  <div className="mb-6 inline-flex p-3 rounded-2xl bg-primary/10 border border-primary/20">
+                    <TrendingUp className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold text-amber-50 mb-2">Progress & Growth</h3>
-                  <p className="text-sm text-amber-100/70">Track daily milestones and celebrate your journey from day 1 to day 90</p>
-                </GlowingCard>
+                  <h3 className="text-xl font-bold mb-3">Progress & Growth</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">Track daily milestones and celebrate your journey from day 1 to day 90.</p>
+                </div>
               </div>
 
               {/* CTA Button */}
-              <div className="pt-8 flex flex-wrap items-center justify-center gap-4">
+              <div className="pt-12 flex flex-wrap items-center justify-center gap-4">
                 <button
-                  onClick={() => setShowOnboarding(true)}
-                  className="inline-flex items-center gap-3 text-lg group px-8 py-4 rounded-2xl bg-amber-500 text-black hover:bg-amber-400 smooth-transition"
+                  onClick={onStartJourney}
+                  className="inline-flex items-center gap-3 text-base font-semibold group px-8 py-4 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
                 >
-                  <Zap className="w-5 h-5" />
+                  <Zap className="w-4 h-4" />
                   Start Your 90-Day Journey
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 smooth-transition" />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
                 <Link
                   href="/lpu"
-                  className="inline-flex items-center gap-3 text-lg px-8 py-4 rounded-2xl border border-amber-500/40 text-amber-100 hover:border-amber-400 smooth-transition"
+                  className="inline-flex items-center gap-3 text-base font-semibold px-8 py-4 rounded-xl border bg-card hover:bg-accent hover:text-accent-foreground transition-colors shadow-sm"
                 >
                   Explore LPU Ecosystem
                 </Link>
               </div>
 
-              {/* Sign-off */}
-              <p className="text-xs text-amber-200/70 pt-4">
-                ✨ No credit card required • All data saved locally • No tracking
+              <p className="text-sm text-muted-foreground pt-6 font-medium flex items-center justify-center gap-2">
+                <Sparkles className="w-4 h-4" /> No credit card required • 100% Local Processing • No tracking
               </p>
             </div>
           </div>
@@ -151,180 +178,157 @@ export function LandingScreen({ onStart }: LandingScreenProps) {
     );
   }
 
-  // Onboarding Form with 3D Card
+  // Onboarding Form (SaaS Clean)
   return (
-    <div className="min-h-screen relative dark:bg-gradient-to-br dark:from-slate-950 dark:to-slate-900 bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Background elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-40 left-10 w-96 h-96 dark:bg-purple-500/10 bg-purple-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-40 right-10 w-96 h-96 dark:bg-blue-500/10 bg-blue-500/5 rounded-full blur-3xl"></div>
-      </div>
+    <div className="min-h-screen relative bg-background text-foreground flex items-center justify-center py-10">
+      <div className="relative z-10 w-full max-w-3xl px-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        
+        <button
+          onClick={onBackFromOnboarding}
+          className="mb-8 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group text-sm font-medium w-fit border bg-card px-5 py-2.5 rounded-full hover:bg-accent shadow-sm"
+        >
+          <ArrowRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
+          Cancel Setup
+        </button>
 
-      <div className="relative z-10 py-12 px-4">
-        <div className="max-w-3xl mx-auto">
-          {/* Header */}
-          <div className="mb-12 text-center">
-            <button
-              onClick={() => setShowOnboarding(false)}
-              className="mx-auto mb-6 dark:text-gray-400 dark:hover:text-white text-slate-500 hover:text-slate-900 smooth-transition flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <ArrowRight className="w-4 h-4 rotate-180" />
-              Back
-            </button>
-            <h1 className="text-4xl md:text-5xl font-bold text-balance mb-3 dark:text-white text-slate-900">
-              <span className="text-gradient">Tell Us About Yourself</span>
+        <div className="bg-card border rounded-[2.5rem] p-8 md:p-12 shadow-lg">
+          <div className="mb-10 text-center">
+            <h1 className="font-display font-bold text-4xl text-foreground mb-4 tracking-tight">
+              Tell Us About Yourself
             </h1>
-            <p className="dark:text-gray-300 text-slate-600">Personalize your mentoring experience for maximum impact</p>
+            <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+              We use this data to instantly personalize your AI mentor and tailor your dashboard.
+            </p>
           </div>
 
-          {/* 3D Card Container */}
-          <CardContainer containerClassName="h-auto">
-            <CardBody className="dark:bg-slate-900/50 bg-white/80 dark:border-slate-700 border-slate-200 p-10 space-y-8">
-              {/* Name Input */}
-              <CardItem
-                as="div"
-                translateZ={0}
-                className="space-y-3"
-              >
-                <label className="section-label dark:text-purple-400 text-purple-600">Your Name</label>
-                <div className="relative">
-                  <Input
-                    placeholder="Enter your full name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="input-glass dark:bg-slate-800/50 dark:border-slate-700 dark:text-white dark:placeholder-gray-500 bg-white/50 border-slate-300 text-slate-900 placeholder-slate-400 pl-12"
-                  />
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl">👤</span>
-                </div>
-              </CardItem>
+          <div className="space-y-8 max-w-2xl mx-auto">
+            {/* Name Input */}
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-foreground">
+                Your Full Name
+              </label>
+              <div className="relative">
+                <Input
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="h-14 bg-background border-input text-foreground text-lg rounded-xl pl-12 focus-visible:ring-primary shadow-sm"
+                />
+                <Brain className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              </div>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Branch Select */}
-              <CardItem
-                as="div"
-                translateZ={0}
-                className="space-y-3"
-              >
-                <label className="section-label dark:text-purple-400 text-purple-600">Your Branch</label>
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-foreground">
+                  Academic Branch
+                </label>
                 <div className="relative">
                   <select
                     value={branch}
                     onChange={(e) => setBranch(e.target.value)}
-                    className="w-full input-glass dark:bg-slate-800/50 dark:border-slate-700 dark:text-white bg-white/50 border-slate-300 text-slate-900 pl-12 appearance-none cursor-pointer"
+                    className="w-full h-14 bg-background border border-input text-foreground pl-12 pr-10 rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary shadow-sm text-base"
                   >
-                    <option value="">Select your branch</option>
-                    <option value="CSE">🖥️ Computer Science Engineering</option>
-                    <option value="ECE">📡 Electronics & Communication</option>
-                    <option value="EEE">⚡ Electrical Engineering</option>
-                    <option value="ME">🔧 Mechanical Engineering</option>
-                    <option value="CIVIL">🏗️ Civil Engineering</option>
-                    <option value="Other">📚 Other</option>
+                    <option value="" disabled>Select branch</option>
+                    <option value="CSE">Computer Science (CSE)</option>
+                    <option value="ECE">Electronics (ECE)</option>
+                    <option value="EEE">Electrical (EEE)</option>
+                    <option value="ME">Mechanical (ME)</option>
+                    <option value="CIVIL">Civil Engineering</option>
+                    <option value="Other">Other</option>
                   </select>
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl">⚡</span>
-                  <Zap className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 dark:text-gray-500 text-gray-400 pointer-events-none" />
+                  <Zap className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 </div>
-              </CardItem>
+              </div>
 
               {/* Hostel Select */}
-              <CardItem
-                as="div"
-                translateZ={0}
-                className="space-y-3"
-              >
-                <label className="section-label dark:text-purple-400 text-purple-600">Living Status</label>
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-foreground">
+                  Living Status
+                </label>
                 <div className="relative">
                   <select
                     value={hostel}
                     onChange={(e) => setHostel(e.target.value)}
-                    className="w-full input-glass dark:bg-slate-800/50 dark:border-slate-700 dark:text-white bg-white/50 border-slate-300 text-slate-900 pl-12 appearance-none cursor-pointer"
+                    className="w-full h-14 bg-background border border-input text-foreground pl-12 pr-10 rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary shadow-sm text-base"
                   >
-                    <option value="">Select your status</option>
-                    <option value="hostel">🏠 Hostel Student</option>
-                    <option value="day">🚗 Day Scholar</option>
+                    <option value="" disabled>Select status</option>
+                    <option value="hostel">Hostel Resident</option>
+                    <option value="day">Day Scholar</option>
                   </select>
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl">🏢</span>
-                  <Zap className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 dark:text-gray-500 text-gray-400 pointer-events-none" />
+                  <BookOpen className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 </div>
-              </CardItem>
+              </div>
+            </div>
 
-              {/* Interests */}
-              <CardItem
-                as="div"
-                translateZ={0}
-                className="space-y-4"
-              >
-                <label className="section-label dark:text-purple-400 text-purple-600">Your Interests (Optional)</label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {interestOptions.map((interest, idx) => (
+            {/* Activities */}
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-foreground flex items-center justify-between">
+                Activities <span className="text-muted-foreground font-normal text-xs">Optional</span>
+              </label>
+              <div className="relative">
+                <Input
+                  placeholder="e.g. Sports, Robotics, Arts"
+                  value={extracurricular}
+                  onChange={(e) => setExtracurricular(e.target.value)}
+                  className="h-14 bg-background border-input text-foreground text-base rounded-xl pl-12 focus-visible:ring-primary shadow-sm"
+                />
+                <Sparkles className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              </div>
+            </div>
+
+            {/* Interests */}
+            <div className="space-y-4 pt-2">
+               <label className="text-sm font-semibold text-foreground flex items-center justify-between">
+                Interests <span className="text-muted-foreground font-normal text-xs">{interests.length} selected</span>
+              </label>
+              <div className="flex flex-wrap gap-2.5">
+                {INTEREST_OPTIONS.map((interest) => {
+                  const isActive = interests.includes(interest);
+                  return (
                     <button
                       key={interest}
                       onClick={() => toggleInterest(interest)}
-                      className={`px-4 py-3 rounded-xl font-medium smooth-transition relative overflow-hidden group cursor-pointer ${
-                        interests.includes(interest)
-                          ? 'gradient-primary text-white shadow-lg shadow-purple-500/50' 
-                          : 'dark:bg-slate-800/50 dark:border-slate-700 dark:text-gray-200 dark:hover:border-purple-500/50 bg-white/50 border border-slate-300 text-slate-900 hover:border-purple-400'
+                      className={`px-5 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                        isActive 
+                          ? 'bg-primary text-primary-foreground border-primary shadow-sm' 
+                          : 'bg-background hover:bg-accent text-foreground border-input'
                       }`}
                     >
-                      <span className="relative z-10">{interest}</span>
-                      {interests.includes(interest) && (
-                        <Sparkles className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 opacity-70" />
-                      )}
+                      {interest}
                     </button>
-                  ))}
-                </div>
-              </CardItem>
+                  );
+                })}
+              </div>
+            </div>
 
-              {/* Progress Bar */}
-              <CardItem
-                as="div"
-                translateZ={0}
-                className="space-y-2"
+            {/* Submit */}
+            <div className="pt-8">
+              <button
+                onClick={handleStart}
+                disabled={!name || !branch}
+                className={`w-full h-14 rounded-xl font-bold text-base transition-all duration-300 flex items-center justify-center gap-2 ${
+                  name && branch
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg'
+                    : 'bg-muted text-muted-foreground cursor-not-allowed'
+                }`}
               >
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold dark:text-gray-400 text-slate-500 uppercase tracking-wide">Profile Completion</span>
-                  <span className="text-sm font-semibold dark:text-purple-300 text-purple-600">
-                    {Math.round(((name ? 1 : 0) + (branch ? 1 : 0)) / 2 * 100)}%
-                  </span>
-                </div>
-                <div className="w-full h-2 rounded-full dark:bg-slate-700/50 dark:border-purple-500/20 bg-slate-200/50 border border-purple-300/30 overflow-hidden">
-                  <div 
-                    className="h-full gradient-primary rounded-full smooth-transition"
-                    style={{ width: `${((name ? 1 : 0) + (branch ? 1 : 0)) / 2 * 100}%` }}
-                  ></div>
-                </div>
-              </CardItem>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Initializing...
+                  </>
+                ) : (
+                  <>
+                    Initialize Profile
+                    <ArrowRight className="w-5 h-5" />
+                  </>
+                )}
+              </button>
+            </div>
 
-              {/* Submit Button */}
-              <CardItem
-                as="div"
-                translateZ={0}
-                className=""
-              >
-                <button
-                  onClick={handleStart}
-                  disabled={!name || !branch}
-                  className={`w-full h-14 rounded-xl font-semibold text-base smooth-transition flex items-center justify-center gap-2 relative overflow-hidden group ${
-                    name && branch
-                      ? 'btn-gradient btn-pulse shadow-lg'
-                      : 'dark:bg-slate-800 dark:text-gray-500 bg-slate-200 text-slate-400 cursor-not-allowed opacity-60'
-                  }`}
-                >
-                  {name && branch ? (
-                    <>
-                      <Sparkles className="w-5 h-5" />
-                      Begin My 90-Day Journey
-                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 smooth-transition" />
-                    </>
-                  ) : (
-                    <span>Fill in your details to continue</span>
-                  )}
-                </button>
-              </CardItem>
-
-              <p className="text-xs dark:text-gray-400 text-slate-500 text-center pt-4">
-                Your data is saved locally on your device. We don't collect or store any information.
-              </p>
-            </CardBody>
-          </CardContainer>
+          </div>
         </div>
       </div>
     </div>

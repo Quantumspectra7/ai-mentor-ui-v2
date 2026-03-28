@@ -126,50 +126,59 @@ function FeatureItem({ icon: Icon, label, description }: { icon: any; label: str
 }
 
 function LPUExplorerModules({ userType, onNavigateToModule }: { userType: UserType; onNavigateToModule?: (module: string) => void }) {
-  const modules = [
+  const allModules = [
     {
       id: 'videos',
       icon: '🎥',
       title: 'Video Hub',
       description: 'Campus tours, admission process, hostel life, academics, coding',
+      for: ['pre-admission', 'new-student', 'fresher']
     },
     {
       id: 'stories',
       icon: '🏆',
       title: 'Success Stories',
       description: 'Real placements, hackathon winners, startups, diverse careers',
+      for: ['pre-admission', 'fresher']
     },
     {
       id: 'procedures',
       icon: '📋',
       title: 'Procedures & Guides',
       description: 'Documents checklist, hostel allocation, fee payment, ID card process',
+      for: ['pre-admission', 'new-student']
     },
     {
       id: 'senior-advice',
       icon: '💬',
       title: 'Senior Comments',
       description: 'Honest advice from seniors in your branch and hostel',
+      for: ['new-student', 'fresher']
     },
     {
       id: 'reality-check',
       icon: '⚡',
       title: 'Reality Check',
       description: 'Expectation vs reality - honest campus truths',
+      for: ['pre-admission', 'new-student']
     },
     {
       id: 'resources',
       icon: '📚',
       title: 'Study Resources',
       description: 'Curated notes, playlists, and tools for each semester',
+      for: ['fresher']
     },
     {
       id: 'branch-explorer',
       icon: '🧭',
       title: 'Branch Explorer',
       description: 'Detailed info, careers, and "is this for you?" quiz',
+      for: ['pre-admission']
     },
   ];
+
+  const modules = allModules.filter(m => m.for.includes(userType));
 
   return (
     <div className="min-h-screen py-12">

@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { LpuUserTypeToggle } from '@/components/lpu/LpuUserTypeToggle';
 
 const navItems = [
   { href: '/lpu', label: 'Overview' },
@@ -15,50 +14,23 @@ const navItems = [
 export default function LpuLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen grain-overlay">
-      <header className="sticky top-0 z-40 border-b border-amber-500/15 bg-black/40 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-6 px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-200">
-                <span className="font-display text-lg">AM</span>
-              </div>
-              <div className="leading-tight">
-                <p className="font-display text-lg text-amber-50">AI Mentor</p>
-                <p className="text-xs text-amber-100/60">LPU Explorer</p>
-              </div>
-            </Link>
-          </div>
-          <nav className="hidden flex-wrap gap-4 text-sm text-amber-100/80 lg:flex">
+      <header className="sticky top-0 z-40 border-b border-amber-500/20 bg-gradient-to-b from-black/60 to-black/40 backdrop-blur-xl shadow-lg" aria-label="LPU header">
+        <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-center">
+          <nav className="flex flex-wrap items-center justify-center gap-3 md:gap-4" aria-label="LPU section navigation">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="transition hover:text-amber-200"
+                className="group relative px-3.5 py-2 text-sm md:text-base font-semibold text-amber-100/90 transition-all duration-300 hover:text-amber-50 hover:bg-amber-500/10 rounded-lg border border-transparent hover:border-amber-500/40"
               >
-                {item.label}
+                <span className="relative z-10">{item.label}</span>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-500/0 to-amber-500/0 group-hover:from-amber-500/10 group-hover:to-transparent transition-all duration-300 pointer-events-none" />
               </Link>
             ))}
           </nav>
-          <div className="hidden md:block">
-            <LpuUserTypeToggle />
-          </div>
-        </div>
-        <div className="mx-auto flex max-w-6xl flex-wrap gap-3 px-4 pb-4 text-xs text-amber-100/80 lg:hidden">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-full border border-amber-500/20 px-3 py-1 transition hover:border-amber-400/60"
-            >
-              {item.label}
-            </Link>
-          ))}
-          <div className="mt-2 w-full">
-            <LpuUserTypeToggle />
-          </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-10">{children}</main>
+      <main className="mx-auto max-w-7xl px-6 py-10">{children}</main>
     </div>
   );
 }

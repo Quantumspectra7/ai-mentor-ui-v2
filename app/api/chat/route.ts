@@ -1,25 +1,27 @@
 import Groq from 'groq-sdk';
 import { NextRequest, NextResponse } from 'next/server';
 
-const MENTOR_SYSTEM_PROMPT = `You are an empathetic, supportive AI mentor for college freshers navigating their first 90 days. Your role is to:
+const MENTOR_SYSTEM_PROMPT = `You are a student-first AI mentor focused on real campus life and day-to-day college success. Your role is to:
 
-1. Provide guidance on academics, campus life, social connections, and personal growth
-2. Be understanding and supportive, especially when students are stressed
-3. Give practical, actionable advice tailored to their phase of college
-4. Encourage without being preachy
-5. Acknowledge challenges while maintaining optimism
-6. Adapt your tone based on their emotional state (stressed, neutral, motivated)
-7. Keep responses concise (2-3 paragraphs) but meaningful
-8. Use relatable language and occasional emojis to maintain warmth
-9. Reference their current day in the 90-day journey when relevant
-10. Help them build confidence gradually
+1. Prioritize practical student needs: schedules, assignments, exams, attendance, deadlines, and routines
+2. Help with campus survival: clubs, hostel life, food, transport, navigation, and peer connections
+3. Give step-by-step, actionable advice with clear next actions
+4. Be friendly, relatable, and supportive without being preachy
+5. Adapt tone to the student's mood (stressed, neutral, motivated)
+6. Keep answers short: 2-3 lines max unless the user explicitly asks for detail
+7. Use simple language, avoid jargon, and be specific when possible
+8. Reference their current day/phase in the 90-day journey when it helps
+9. Encourage healthy habits: sleep, focus, stress control, and balance
+10. If unsure, ask a short clarifying question before giving a long answer
 
-Remember: You're not just an information source, you're a friend and guide helping them transition to college life.`;
+11. Use the personalization details from the onboarding form when relevant
+
+Remember: You're a helpful senior who gives practical, student-oriented guidance.`;
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { message, mood = 'neutral', currentDay = 1, phase = 1 } = body;
+    const { message, mood = 'neutral', currentDay = 1, phase = 1, personalization = {} } = body;
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -48,9 +50,41 @@ export async function POST(request: NextRequest) {
       moodContext = ' (They seem energized and motivated!)';
     }
 
+    const safePersonalization = personalization && typeof personalization === 'object' ? personalization : {};
+    const {
+      name,
+      branch,
+      hostel,
+      interests,
+      extracurricular,
+      userType,
+      currentModule,
+      todayTasks,
+    } = safePersonalization as {
+      name?: string;
+      branch?: string;
+      hostel?: string;
+      interests?: string[];
+      extracurricular?: string;
+      userType?: string;
+      currentModule?: string | null;
+      todayTasks?: string[];
+    };
+
+    const personalizationBits = [
+      name ? `Name: ${name}` : null,
+      branch ? `Branch: ${branch}` : null,
+      hostel ? `Hostel: ${hostel}` : null,
+      Array.isArray(interests) && interests.length > 0 ? `Interests: ${interests.join(', ')}` : null,
+      extracurricular ? `Co-curricular: ${extracurricular}` : null,
+      userType ? `User type: ${userType}` : null,
+      currentModule ? `Current module: ${currentModule}` : null,
+      Array.isArray(todayTasks) && todayTasks.length > 0 ? `Today's tasks: ${todayTasks.join('; ')}` : null,
+    ].filter(Boolean);
+
     const contextMessage = `This is day ${currentDay} of their 90-day college journey (Phase ${phase}). They're in the ${
       phase === 1 ? 'Orientation' : phase === 2 ? 'Growth' : 'Confidence'
-    } phase.${moodContext}`;
+    } phase.${moodContext}${personalizationBits.length ? `\nPersonalization: ${personalizationBits.join(' | ')}` : ''}`;
 
     const messages = [
       {
@@ -67,16 +101,32 @@ export async function POST(request: NextRequest) {
       model: 'llama-3.1-8b-instant',
       messages: messages,
       temperature: 0.9,
-      max_tokens: 800,
+      max_tokens: 250,
     });
 
     const responseText =
       completion.choices[0]?.message?.content ||
       "I'm having trouble responding right now. Please try again!";
 
+    const paramsUsed = [
+      'message',
+      'mood',
+      'currentDay',
+      'phase',
+      name ? 'name' : null,
+      branch ? 'branch' : null,
+      hostel ? 'hostel' : null,
+      Array.isArray(interests) && interests.length > 0 ? 'interests' : null,
+      extracurricular ? 'extracurricular' : null,
+      userType ? 'userType' : null,
+      currentModule ? 'currentModule' : null,
+      Array.isArray(todayTasks) && todayTasks.length > 0 ? 'todayTasks' : null,
+    ].filter(Boolean);
+
     return NextResponse.json({
       success: true,
       response: responseText,
+      paramsUsed,
     });
   } catch (error) {
     console.error('Chat API error:', error);
