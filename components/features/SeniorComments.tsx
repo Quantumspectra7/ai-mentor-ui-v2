@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -68,7 +68,7 @@ export function SeniorComments({ onBack }: SeniorCommentsProps) {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 bg-background text-foreground min-h-screen py-10 px-4 sm:px-6 max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-12">
           {onBack && (
@@ -76,9 +76,9 @@ export function SeniorComments({ onBack }: SeniorCommentsProps) {
               ← Back
             </Button>
           )}
-          <p className="eyebrow text-xs text-amber-300">Senior Advice</p>
-          <h1 className="font-display hero-title text-4xl text-amber-50 mb-2 md:text-5xl">💬 Senior Comments</h1>
-          <p className="text-amber-100/70">
+          <p className="eyebrow text-xs text-amber-600 dark:text-amber-300">Senior Advice</p>
+          <h1 className="font-display hero-title text-4xl text-foreground mb-2 md:text-5xl">💬 Senior Comments</h1>
+          <p className="text-muted-foreground">
             Raw, unfiltered wisdom from seniors. {filtered.length} comments
           </p>
         </div>
@@ -86,7 +86,7 @@ export function SeniorComments({ onBack }: SeniorCommentsProps) {
         {/* Filters */}
         <div className="mb-8 space-y-4">
           <div>
-            <p className="text-sm font-semibold text-amber-100/70 mb-2">Filter by Branch:</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">Filter by Branch:</p>
             <div className="flex flex-wrap gap-2">
               {branches.map((branch) => (
                 <Badge
@@ -96,7 +96,7 @@ export function SeniorComments({ onBack }: SeniorCommentsProps) {
                   className={`cursor-pointer ${
                     selectedBranch === branch
                       ? 'bg-amber-500 text-black hover:bg-amber-400'
-                      : 'border-amber-500/30 text-amber-100'
+                      : 'border-amber-500/30 text-foreground'
                   }`}
                 >
                   {branch.toUpperCase()}
@@ -106,7 +106,7 @@ export function SeniorComments({ onBack }: SeniorCommentsProps) {
           </div>
 
           <div>
-            <p className="text-sm font-semibold text-amber-100/70 mb-2">Filter by Type:</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">Filter by Type:</p>
             <div className="flex flex-wrap gap-2">
               {moods.map((mood) => (
                 <Badge
@@ -129,7 +129,7 @@ export function SeniorComments({ onBack }: SeniorCommentsProps) {
               className={
                 sortBy === 'helpful'
                   ? 'bg-amber-500 text-black hover:bg-amber-400'
-                  : 'border-amber-500/30 text-amber-100'
+                  : 'border-amber-500/30 text-foreground'
               }
             >
               Most Helpful 👍
@@ -141,7 +141,7 @@ export function SeniorComments({ onBack }: SeniorCommentsProps) {
               className={
                 sortBy === 'recent'
                   ? 'bg-amber-500 text-black hover:bg-amber-400'
-                  : 'border-amber-500/30 text-amber-100'
+                  : 'border-amber-500/30 text-foreground'
               }
             >
               Most Recent ⏰
@@ -162,10 +162,10 @@ export function SeniorComments({ onBack }: SeniorCommentsProps) {
                     <div className="flex items-center gap-2 mb-2">
                       <div className="text-2xl">{getMoodIcon(comment.mood)}</div>
                       <div>
-                        <p className="font-semibold text-amber-50">
+                        <p className="font-semibold text-foreground">
                           {comment.name ? comment.name : 'Anonymous Senior'}
                         </p>
-                        <p className="text-xs text-amber-100/60">
+                        <p className="text-xs text-muted-foreground">
                           {comment.branch} • Year {comment.year}
                           {comment.hostel && ` • ${comment.hostel}`}
                           {comment.gender && ` • ${comment.gender === 'M' ? 'Male' : 'Female'}`}
@@ -180,17 +180,17 @@ export function SeniorComments({ onBack }: SeniorCommentsProps) {
               </CardHeader>
 
               <CardContent>
-                <p className="text-amber-100/70 italic mb-4 text-lg leading-relaxed">"{comment.advice}"</p>
+                <p className="text-muted-foreground italic mb-4 text-lg leading-relaxed">"{comment.advice}"</p>
 
                 <div className="flex items-center justify-between pt-3 border-t border-amber-500/20">
                   <div className="flex gap-2">
                     {comment.tags.map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs border-amber-500/30 text-amber-200">
+                      <Badge key={tag} variant="outline" className="text-xs border-amber-500/30 text-foreground">
                         #{tag}
                       </Badge>
                     ))}
                   </div>
-                  <Button variant="ghost" size="sm" className="text-amber-200 hover:text-emerald-300">
+                  <Button variant="ghost" size="sm" className="text-foreground hover:text-emerald-300">
                     <ThumbsUp className="w-4 h-4 mr-1" />
                     {comment.helpful}
                   </Button>
@@ -202,7 +202,7 @@ export function SeniorComments({ onBack }: SeniorCommentsProps) {
 
         {filtered.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-amber-100/70 text-lg">
+            <p className="text-muted-foreground text-lg">
               No comments found. Try adjusting filters!
             </p>
           </div>
@@ -211,9 +211,9 @@ export function SeniorComments({ onBack }: SeniorCommentsProps) {
         {/* Insight */}
         <Card className="mt-16 luxe-card border-amber-500/30">
           <CardHeader>
-            <p className="text-amber-50 font-bold mb-2">💡 Why Senior Comments Matter</p>
+            <p className="text-foreground font-bold mb-2">💡 Why Senior Comments Matter</p>
           </CardHeader>
-          <CardContent className="text-amber-100/70 space-y-2 text-sm">
+          <CardContent className="text-muted-foreground space-y-2 text-sm">
             <p>✓ These are real people who lived through what you're about to experience</p>
             <p>✓ They won't sugarcoat- you get honest, street-level wisdom</p>
             <p>✓ Filter by branch/mood to find the most relevant advice</p>
@@ -224,3 +224,6 @@ export function SeniorComments({ onBack }: SeniorCommentsProps) {
     </div>
   );
 }
+
+
+

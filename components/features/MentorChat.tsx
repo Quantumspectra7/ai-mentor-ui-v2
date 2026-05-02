@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Send, Smile, AlertCircle, Zap, MessageCircle, AlertTriangle, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Send, Smile, AlertCircle, Zap, MessageCircle, AlertTriangle } from 'lucide-react';
 import { getMentorResponse, getPhaseNumber } from '@/lib/mentorKnowledge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -16,7 +16,8 @@ interface Message {
 
 interface MentorChatProps {
   currentDay: number;
-  onBack: () => void;
+  onBack?: () => void;
+  isFloating?: boolean;
 }
 
 interface ChatPersonalization {
@@ -28,21 +29,17 @@ interface ChatPersonalization {
   userType?: string;
   currentModule?: string | null;
   todayTasks?: string[];
+  myCornerData?: any;
 }
 
-export function MentorChat({ currentDay, onBack }: MentorChatProps) {
+export function MentorChat({ currentDay, onBack, isFloating }: MentorChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [mood, setMood] = useState<'neutral' | 'stressed' | 'motivated'>('neutral');
   const [isTyping, setIsTyping] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [lastRequestTime, setLastRequestTime] = useState(0);
-  const [voiceSupported, setVoiceSupported] = useState(true);
-  const [isListening, setIsListening] = useState(false);
-  const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
   const phase = getPhaseNumber(currentDay);
 
   const buildWelcomeMessage = () => ({
@@ -55,24 +52,6 @@ export function MentorChat({ currentDay, onBack }: MentorChatProps) {
   const persistChatHistory = async (nextMessages: Message[]) => {
     const trimmed = nextMessages.slice(-50);
     localStorage.setItem('chatHistory', JSON.stringify(trimmed));
-
-    const authId = localStorage.getItem('userAuthId');
-    const email = localStorage.getItem('userEmail');
-    if (!authId && !email) return;
-
-    try {
-      await fetch('/api/auth/update-progress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          authId,
-          email,
-          progress: { chatHistory: trimmed },
-        }),
-      });
-    } catch (error) {
-      console.error('Failed to persist chat history:', error);
-    }
   };
 
   useEffect(() => {
@@ -81,35 +60,10 @@ export function MentorChat({ currentDay, onBack }: MentorChatProps) {
       const parsed = JSON.parse(cached) as Message[];
       if (parsed.length > 0) {
         setMessages(parsed);
+        return;
       }
     }
-
-    const authId = localStorage.getItem('userAuthId');
-    const email = localStorage.getItem('userEmail');
-
-    if (authId || email) {
-      fetch('/api/auth/get-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ authId, email }),
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          const history = data?.user?.progress?.chatHistory as Message[] | undefined;
-          if (history && history.length > 0) {
-            setMessages(history);
-            localStorage.setItem('chatHistory', JSON.stringify(history));
-          } else if (!cached) {
-            setMessages([buildWelcomeMessage()]);
-          }
-        })
-        .catch((error) => {
-          console.error('Failed to load chat history:', error);
-          if (!cached) setMessages([buildWelcomeMessage()]);
-        });
-    } else if (!cached) {
-      setMessages([buildWelcomeMessage()]);
-    }
+    setMessages([buildWelcomeMessage()]);
   }, [currentDay]);
 
   useEffect(() => {
@@ -118,14 +72,30 @@ export function MentorChat({ currentDay, onBack }: MentorChatProps) {
     }
   }, [messages]);
 
-  const quickQuestions = [
-    { topic: 'Academics', emoji: '📚' },
-    { topic: 'Campus Life', emoji: '🏫' },
-    { topic: 'Social', emoji: '👥' },
-    { topic: 'Stress Help', emoji: '🧘' },
-    { topic: 'Motivation', emoji: '⚡' },
-    { topic: 'Career', emoji: '🚀' }
-  ];
+  const getContextualChips = () => {
+    try {
+      const raw = localStorage.getItem('mentorProfile');
+      const profile = raw ? JSON.parse(raw) : null;
+      const interests: string[] = Array.isArray(profile?.interests) ? profile.interests : [];
+      const chips: { topic: string; emoji: string }[] = [
+        { topic: `What should I focus on Day ${currentDay}?`, emoji: '📅' },
+        { topic: 'How do I check attendance on ERP?', emoji: '📋' },
+        { topic: 'I\'m feeling overwhelmed', emoji: '😤' },
+        { topic: 'Help me with my academics', emoji: '📚' },
+      ];
+      if (interests.includes('Coding')) chips.splice(2, 0, { topic: 'Give me a DSA problem to practice', emoji: '💻' });
+      if (interests.includes('Design')) chips.splice(2, 0, { topic: 'How do I start learning Figma?', emoji: '🎨' });
+      if (interests.includes('Sports')) chips.splice(2, 0, { topic: 'How to balance sports and studies?', emoji: '⚽' });
+      return chips.slice(0, 4);
+    } catch {
+      return [
+        { topic: `What should I focus on Day ${currentDay}?`, emoji: '📅' },
+        { topic: 'I\'m feeling overwhelmed', emoji: '😤' },
+        { topic: 'Help me with my academics', emoji: '📚' },
+        { topic: 'How to stay consistent?', emoji: '⚡' },
+      ];
+    }
+  };
 
   const moodOptions = [
     { value: 'stressed' as const, icon: AlertCircle, label: 'Stressed', color: 'text-red-500' },
@@ -183,20 +153,6 @@ export function MentorChat({ currentDay, onBack }: MentorChatProps) {
       setMood(derivedMood);
     }
 
-    const speakText = (content: string) => {
-      if (!voiceSupported || !voiceEnabled || typeof window === 'undefined') return;
-      const synth = window.speechSynthesis;
-      if (!synth) return;
-      synth.cancel();
-      const utterance = new SpeechSynthesisUtterance(content);
-      utterance.lang = 'en-IN';
-      utterance.rate = 1;
-      utterance.pitch = 1;
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      setIsSpeaking(true);
-      synth.speak(utterance);
-    };
 
     try {
       const personalization: ChatPersonalization = (() => {
@@ -204,9 +160,11 @@ export function MentorChat({ currentDay, onBack }: MentorChatProps) {
           const profileRaw = localStorage.getItem('mentorProfile');
           const lpuRaw = localStorage.getItem('lpuState');
           const tasksByDayRaw = localStorage.getItem('tasksByDay');
+          const myCornerRaw = localStorage.getItem('myCornerData');
           const profile = profileRaw ? JSON.parse(profileRaw) : null;
           const lpuState = lpuRaw ? JSON.parse(lpuRaw) : null;
           const tasksByDay = tasksByDayRaw ? JSON.parse(tasksByDayRaw) : null;
+          const myCornerData = myCornerRaw ? JSON.parse(myCornerRaw) : null;
           const todayTasks = tasksByDay?.[String(currentDay)] || tasksByDay?.[currentDay] || [];
 
           return {
@@ -218,6 +176,12 @@ export function MentorChat({ currentDay, onBack }: MentorChatProps) {
             userType: lpuState?.userType || undefined,
             currentModule: lpuState?.currentModule ?? undefined,
             todayTasks: Array.isArray(todayTasks) ? todayTasks : undefined,
+            // New Evaluation Engine Profile Data
+            weakSubjects: Array.isArray(profile?.weakSubjects) ? profile.weakSubjects : undefined,
+            stressLevel: profile?.stressLevel ?? undefined,
+            attendance: profile?.attendance ?? undefined,
+            procrastinationLevel: profile?.procrastinationLevel || undefined,
+            myCornerData: myCornerData || undefined,
           };
         } catch {
           return {};
@@ -250,9 +214,43 @@ export function MentorChat({ currentDay, onBack }: MentorChatProps) {
       const data = await response.json();
 
       if (data.success && data.response) {
+        let cleanText = data.response;
+        
+        // Agentic JSON interceptor
+        const jsonMatch = data.response.match(/```json\n([\s\S]*?)\n```/);
+        if (jsonMatch) {
+          try {
+            const command = JSON.parse(jsonMatch[1]);
+            cleanText = data.response.replace(/```json\n([\s\S]*?)\n```/, '').trim();
+            
+            // Dispatch command to custom tasks
+            const customTasksKey = `customTasks_${currentDay}`;
+            const existingTasksRaw = localStorage.getItem(customTasksKey);
+            let customTasks = existingTasksRaw ? JSON.parse(existingTasksRaw) : [];
+            
+            if (command.action === 'ADD_TASK') {
+              customTasks.push({
+                title: command.title,
+                why: command.why || 'Added by AI Mentor',
+                type: 'academics',
+                priority: command.priority || 'Medium'
+              });
+            } else if (command.action === 'REMOVE_TASK') {
+              customTasks = customTasks.filter((t: any) => !t.title.toLowerCase().includes(command.title.toLowerCase()));
+            }
+            
+            localStorage.setItem(customTasksKey, JSON.stringify(customTasks));
+            // Trigger a custom event so DashboardScreen can update
+            window.dispatchEvent(new Event('customTasksUpdated'));
+            
+          } catch (err) {
+            console.error('Failed to parse Agentic command', err);
+          }
+        }
+
         const mentorMessage: Message = {
           id: (Date.now() + 1).toString(),
-          text: data.response,
+          text: cleanText,
           sender: 'mentor',
           timestamp: new Date().toISOString()
         };
@@ -261,7 +259,6 @@ export function MentorChat({ currentDay, onBack }: MentorChatProps) {
           persistChatHistory(next);
           return next;
         });
-        speakText(data.response);
       } else {
         throw new Error(data.error || 'Invalid response format');
       }
@@ -294,125 +291,57 @@ export function MentorChat({ currentDay, onBack }: MentorChatProps) {
         persistChatHistory(next);
         return next;
       });
-      speakText(fallbackResponse);
     } finally {
       setIsTyping(false);
     }
   };
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!window.isSecureContext) {
-      setVoiceSupported(false);
-      setApiError('Voice input needs HTTPS or localhost.');
-      return;
-    }
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setVoiceSupported(false);
-      return;
-    }
-    setVoiceSupported(true);
-    return () => {
-      if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch { }
-      }
-    };
-  }, []);
-
-  const toggleListening = () => {
-    if (!voiceSupported || typeof window === 'undefined') return;
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setVoiceSupported(false);
-      return;
-    }
-    if (isListening && recognitionRef.current) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-      return;
-    }
-    try {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.lang = 'en-IN';
-      recognition.onresult = (event: any) => {
-        const results = event?.results;
-        if (!results || !results.length) return;
-        let interimTranscript = '';
-        let finalTranscript = '';
-
-        for (let i = event.resultIndex; i < results.length; i += 1) {
-          const chunk = results[i]?.[0]?.transcript || '';
-          if (results[i].isFinal) finalTranscript += chunk;
-          else interimTranscript += chunk;
-        }
-
-        if (interimTranscript) setInput(interimTranscript);
-        if (finalTranscript) setInput(finalTranscript);
-      };
-      recognition.onerror = (event: any) => {
-        setIsListening(false);
-        if (event?.error === 'not-allowed' || event?.error === 'service-not-allowed') {
-          setApiError('Microphone permission denied.');
-        } else if (event?.error === 'no-speech') {
-          setApiError('No speech detected. Try again.');
-        } else {
-          setApiError('Voice input error. Try again.');
-        }
-      };
-      recognition.onend = () => setIsListening(false);
-      recognitionRef.current = recognition;
-      recognition.start();
-      setIsListening(true);
-    } catch {
-      setIsListening(false);
-      setApiError('Voice input failed to start.');
-    }
-  };
 
   return (
-    <div className="min-h-screen bg-background relative flex flex-col font-sans">
+    <div className={`${isFloating ? 'h-full' : 'min-h-screen'} bg-background relative flex flex-col font-sans`}>
 
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4 flex-1 min-w-0">
-            <button
-              onClick={onBack}
-              className="p-2 rounded-xl bg-card border hover:bg-accent hover:text-accent-foreground transition-colors shrink-0 shadow-sm"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl md:text-2xl font-bold text-foreground truncate flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-primary shrink-0" />
-                Mentor Chat
-              </h1>
-              <p className="text-xs md:text-sm text-muted-foreground font-medium">Day {currentDay} • Constant Support</p>
+      {!isFloating && (
+        <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b">
+          <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              {onBack && (
+                <button
+                  onClick={onBack}
+                  className="p-2 rounded-xl bg-card border hover:bg-accent hover:text-accent-foreground transition-colors shrink-0 shadow-sm"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+              )}
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl md:text-2xl font-bold text-foreground truncate flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5 text-primary shrink-0" />
+                  Mentor Chat
+                </h1>
+                <p className="text-xs md:text-sm text-muted-foreground font-medium">Day {currentDay} • Constant Support</p>
+              </div>
+            </div>
+            
+            {/* Mood Selector */}
+            <div className="flex gap-2 ml-4 shrink-0">
+              {moodOptions.map(({ value, icon: Icon, label, color }) => (
+                <button
+                  key={value}
+                  onClick={() => setMood(value)}
+                  className={`p-2.5 rounded-xl transition-all border shadow-sm ${
+                    mood === value
+                      ? `bg-primary/10 border-primary/30 text-primary`
+                      : 'bg-card text-muted-foreground hover:bg-accent hover:text-foreground'
+                  }`}
+                  title={label}
+                >
+                  <Icon className={`w-4 h-4 md:w-5 md:h-5 ${mood === value ? color : ''}`} />
+                </button>
+              ))}
             </div>
           </div>
-          
-          {/* Mood Selector */}
-          <div className="flex gap-2 ml-4 shrink-0">
-            {moodOptions.map(({ value, icon: Icon, label, color }) => (
-              <button
-                key={value}
-                onClick={() => setMood(value)}
-                className={`p-2.5 rounded-xl transition-all border shadow-sm ${
-                  mood === value
-                    ? `bg-primary/10 border-primary/30 text-primary`
-                    : 'bg-card text-muted-foreground hover:bg-accent hover:text-foreground'
-                }`}
-                title={label}
-              >
-                <Icon className={`w-4 h-4 md:w-5 md:h-5 ${mood === value ? color : ''}`} />
-              </button>
-            ))}
-          </div>
         </div>
-      </div>
+      )}
 
       {/* Error Banner */}
       {apiError && (
@@ -447,7 +376,24 @@ export function MentorChat({ currentDay, onBack }: MentorChatProps) {
                     : 'bg-card text-card-foreground border rounded-bl-sm'
                 }`}
               >
-                <p>{message.text}</p>
+                <div
+                  className="prose-mentor"
+                  dangerouslySetInnerHTML={{
+                    __html: message.text
+                      // bold
+                      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                      // italic
+                      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                      // bullet list lines starting with "- " or "* "
+                      .replace(/^(?:[-*]) (.+)/gm, '<li>$1</li>')
+                      // wrap consecutive <li> in <ul>
+                      .replace(/(<li>[\s\S]*?<\/li>(\n|$))+/g, (m) => `<ul class="mt-2 ml-4 space-y-1 list-disc">${m}</ul>`)
+                      // double newline → paragraph break
+                      .replace(/\n{2,}/g, '</p><p class="mt-2">')
+                      // single newline → line break
+                      .replace(/\n/g, '<br />')
+                  }}
+                />
                 <p className={`text-[10px] mt-2 font-medium ${
                   message.sender === 'user' 
                     ? 'text-primary-foreground/70' 
@@ -472,20 +418,20 @@ export function MentorChat({ currentDay, onBack }: MentorChatProps) {
         </div>
       </ScrollArea>
 
-      {/* Quick Questions */}
-      {messages.length === 1 && (
-        <div className="bg-background border-t px-4 md:px-6 py-6 relative z-10">
+      {/* Contextual chips — only on first load, before any user message */}
+      {messages.length <= 1 && messages.every(m => m.sender === 'mentor') && (
+        <div className="bg-background border-t px-4 md:px-6 py-5 relative z-10">
           <div className="max-w-4xl mx-auto">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-4">Common Topics</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {quickQuestions.map((q) => (
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Quick start</p>
+            <div className="flex flex-wrap gap-2">
+              {getContextualChips().map((q) => (
                 <button
                   key={q.topic}
-                  onClick={() => handleQuickQuestion(q.topic)}
-                  className="px-4 py-3 rounded-2xl bg-card border hover:border-primary hover:bg-accent text-foreground text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-sm"
+                  onClick={() => handleSendMessage(q.topic)}
+                  className="px-4 py-2.5 rounded-xl bg-card border hover:border-primary hover:bg-accent text-foreground text-sm font-medium transition-all flex items-center gap-2 shadow-sm"
                 >
                   <span>{q.emoji}</span>
-                  <span className="hidden sm:inline">{q.topic}</span>
+                  <span>{q.topic}</span>
                 </button>
               ))}
             </div>
@@ -508,34 +454,7 @@ export function MentorChat({ currentDay, onBack }: MentorChatProps) {
             }}
             className="flex-1 bg-card border-input text-foreground px-5 py-6 rounded-2xl text-base shadow-sm focus-visible:ring-primary"
           />
-          <button
-            onClick={() => setVoiceEnabled((prev) => !prev)}
-            disabled={!voiceSupported}
-            title={voiceEnabled ? 'Voice on' : 'Voice off'}
-            className={`h-12 w-12 shrink-0 rounded-2xl flex items-center justify-center border transition-all shadow-sm ${
-              voiceEnabled
-                ? 'border-primary/30 text-primary bg-primary/5'
-                : 'border-input text-muted-foreground bg-card hover:bg-accent'
-            } ${voiceSupported ? 'hover:scale-105' : 'opacity-40 cursor-not-allowed'}`}
-          >
-            {voiceEnabled ? (
-              <Volume2 className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
-            ) : (
-              <VolumeX className="w-5 h-5" />
-            )}
-          </button>
-          <button
-            onClick={toggleListening}
-            disabled={!voiceSupported || isTyping}
-            title={isListening ? 'Stop listening' : 'Start voice input'}
-            className={`h-12 w-12 shrink-0 rounded-2xl flex items-center justify-center border transition-all shadow-sm ${
-              isListening
-                ? 'border-destructive/60 text-destructive bg-destructive/10 animate-pulse'
-                : 'border-input text-muted-foreground bg-card hover:bg-accent'
-            } ${voiceSupported ? 'hover:scale-105' : 'opacity-40 cursor-not-allowed'}`}
-          >
-            {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-          </button>
+
           <button
             onClick={() => handleSendMessage(input)}
             disabled={!input.trim() || isTyping}

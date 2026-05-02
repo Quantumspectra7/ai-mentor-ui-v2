@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -54,7 +54,7 @@ export function Procedures({ onBack }: ProceduresProps) {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 bg-background text-foreground min-h-screen py-10 px-4 sm:px-6 max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-12">
           {onBack && (
@@ -62,9 +62,9 @@ export function Procedures({ onBack }: ProceduresProps) {
               ← Back
             </Button>
           )}
-          <p className="eyebrow text-xs text-amber-300">Procedures</p>
-          <h1 className="font-display hero-title text-4xl text-amber-50 mb-2 md:text-5xl">📋 Procedures & Guides</h1>
-          <p className="text-amber-100/70">
+          <p className="eyebrow text-xs text-amber-600 dark:text-amber-300">Procedures</p>
+          <h1 className="font-display hero-title text-4xl text-foreground mb-2 md:text-5xl">📋 Procedures & Guides</h1>
+          <p className="text-muted-foreground">
             Step-by-step guides for admission documents, hostel allocation, fee payment, and more
           </p>
         </div>
@@ -72,8 +72,8 @@ export function Procedures({ onBack }: ProceduresProps) {
         {/* Important Note */}
         <Card className="mb-8 luxe-card border-amber-500/30">
           <CardContent className="pt-6">
-            <p className="text-amber-200 font-semibold mb-2">⚠️ Keep These Handy:</p>
-            <p className="text-amber-100/70">
+            <p className="text-foreground font-semibold mb-2">⚠️ Keep These Handy:</p>
+            <p className="text-muted-foreground">
               Bookmark this page. You'll need to reference it multiple times during admission and first semester. Download PDFs where available.
             </p>
           </CardContent>
@@ -85,7 +85,7 @@ export function Procedures({ onBack }: ProceduresProps) {
             const procs = procedures.filter((p) => p.category === category);
             return (
               <div key={category}>
-                <h2 className="font-display text-2xl text-amber-50 mb-4">
+                <h2 className="font-display text-2xl text-foreground mb-4">
                   {getCategoryIcon(category)} {category.replace('-', ' ').toUpperCase()}
                 </h2>
 
@@ -102,19 +102,19 @@ export function Procedures({ onBack }: ProceduresProps) {
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <CardTitle className="text-lg text-amber-50">
+                              <CardTitle className="text-lg text-foreground">
                                 {proc.title}
                               </CardTitle>
                               {proc.important && (
                                 <Badge className="bg-red-600">⚠️ Important</Badge>
                               )}
                             </div>
-                            <p className="text-sm text-amber-100/60">
+                            <p className="text-sm text-muted-foreground">
                               Estimated time: {proc.estimatedTime}
                             </p>
                           </div>
                           <ChevronDown
-                            className={`w-5 h-5 text-amber-100/60 transition-transform ${
+                            className={`w-5 h-5 text-muted-foreground transition-transform ${
                               expandedId === proc.id ? 'rotate-180' : ''
                             }`}
                           />
@@ -125,7 +125,7 @@ export function Procedures({ onBack }: ProceduresProps) {
                         <CardContent className="space-y-4">
                           {/* Steps */}
                           <div>
-                            <p className="font-semibold text-amber-200 mb-3">
+                            <p className="font-semibold text-foreground mb-3">
                               📋 Steps ({proc.steps.length}):
                             </p>
                             <div className="space-y-2">
@@ -135,7 +135,7 @@ export function Procedures({ onBack }: ProceduresProps) {
                                   className={`flex items-start gap-3 p-3 rounded transition-all ${
                                     completedSteps[proc.id]?.[idx]
                                       ? 'bg-green-500/10 border border-green-500/30'
-                                      : 'bg-black/30 border border-amber-500/20'
+                                      : 'bg-muted/40 border border-amber-500/20'
                                   }`}
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -153,7 +153,7 @@ export function Procedures({ onBack }: ProceduresProps) {
                                       className={
                                         completedSteps[proc.id]?.[idx]
                                           ? 'text-green-300 line-through'
-                                          : 'text-amber-100/70'
+                                          : 'text-muted-foreground'
                                       }
                                     >
                                       {idx + 1}. {step}
@@ -166,12 +166,12 @@ export function Procedures({ onBack }: ProceduresProps) {
                             {/* Progress */}
                             {proc.steps.length > 0 && (
                               <div className="mt-4">
-                                <p className="text-xs text-amber-100/60 mb-1">
+                                <p className="text-xs text-muted-foreground mb-1">
                                   Progress:{' '}
                                   {completedSteps[proc.id]?.filter((v) => v).length || 0} /{' '}
                                   {proc.steps.length}
                                 </p>
-                                <div className="w-full bg-black/40 rounded-full h-2">
+                                <div className="w-full bg-muted/40 rounded-full h-2">
                                   <div
                                     className="bg-emerald-500 h-2 rounded-full transition-all"
                                     style={{
@@ -192,10 +192,10 @@ export function Procedures({ onBack }: ProceduresProps) {
                           <div className="border-t border-amber-500/20 pt-4 flex flex-col gap-2">
                             {proc.contact && (
                               <div>
-                                <p className="text-sm text-amber-100/60 mb-1">
+                                <p className="text-sm text-muted-foreground mb-1">
                                   📞 Contact:
                                 </p>
-                                <p className="text-amber-100/80 font-mono text-sm">
+                                <p className="text-foreground/80 font-mono text-sm">
                                   {proc.contact}
                                 </p>
                               </div>
@@ -205,7 +205,7 @@ export function Procedures({ onBack }: ProceduresProps) {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="border-amber-500/40 text-amber-100 hover:bg-amber-500/10 justify-start"
+                                className="border-amber-500/40 text-foreground hover:bg-amber-500/10 justify-start"
                               >
                                 <Download className="w-4 h-4 mr-2" />
                                 Download PDF/Format
@@ -225,10 +225,10 @@ export function Procedures({ onBack }: ProceduresProps) {
         {/* Checklist Summary */}
         <Card className="mt-12 luxe-card border-amber-500/30">
           <CardHeader>
-            <CardTitle className="font-display text-2xl text-amber-50">✅ Your Completion Status</CardTitle>
+            <CardTitle className="font-display text-2xl text-foreground">✅ Your Completion Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-amber-100/70 mb-4">
+            <p className="text-muted-foreground mb-4">
               Total steps completed:{' '}
               <span className="font-bold text-amber-300">
                 {Object.values(completedSteps)
@@ -237,7 +237,7 @@ export function Procedures({ onBack }: ProceduresProps) {
               </span>{' '}
               / {procedures.reduce((acc, p) => acc + p.steps.length, 0)}
             </p>
-            <div className="w-full bg-black/40 rounded-full h-3">
+            <div className="w-full bg-muted/40 rounded-full h-3">
               <div
                 className="bg-amber-500 h-3 rounded-full transition-all"
                 style={{
@@ -251,7 +251,7 @@ export function Procedures({ onBack }: ProceduresProps) {
                 }}
               />
             </div>
-            <p className="text-xs text-amber-100/60 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               Keep tracking your progress by checking off steps as you complete them
             </p>
           </CardContent>
@@ -259,3 +259,6 @@ export function Procedures({ onBack }: ProceduresProps) {
     </div>
   );
 }
+
+
+

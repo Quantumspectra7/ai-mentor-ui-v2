@@ -45,18 +45,15 @@ export function LPUExplorer({ onSelectUserType, onNavigateToModule }: LPUExplore
 
   if (!selectedType) {
     return (
-      <div className="min-h-screen relative overflow-hidden grain-overlay">
-        <div className="absolute top-0 left-1/4 h-96 w-96 rounded-full bg-amber-500/10 blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-teal-500/10 blur-3xl" />
-
-        <div className="relative z-10 container mx-auto px-4 py-20">
+      <div className="min-h-screen bg-background text-foreground">
+        <div className="container mx-auto px-4 py-20">
           {/* Header */}
           <div className="text-center mb-16">
-            <p className="eyebrow text-xs text-amber-300 mb-3">LPU Explorer</p>
-            <h1 className="font-display hero-title text-5xl md:text-6xl text-amber-50 mb-4">
+            <p className="eyebrow text-xs text-amber-600 dark:text-amber-300 mb-3">LPU Explorer</p>
+            <h1 className="font-display hero-title text-5xl md:text-6xl text-foreground mb-4">
               Welcome to LPU Explorer
             </h1>
-            <p className="text-lg text-amber-100/70 max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Your complete companion for admission, campus life, and success at Lovely Professional University
             </p>
           </div>
@@ -66,16 +63,16 @@ export function LPUExplorer({ onSelectUserType, onNavigateToModule }: LPUExplore
             {userTypes.map((type) => (
               <Card
                 key={type.id}
-                className="cursor-pointer transition-all hover:scale-[1.02] overflow-hidden luxe-card"
+                className="cursor-pointer transition-all hover:-translate-y-1 overflow-hidden bg-card border shadow-sm rounded-3xl group"
                 onClick={() => handleSelectType(type.id as UserType)}
               >
                 <div className={`h-1 bg-gradient-to-r ${type.color}`} />
                 <CardHeader>
                   <div className="text-4xl mb-3">{type.icon}</div>
-                  <CardTitle className="font-display text-2xl text-amber-50">{type.title}</CardTitle>
+                  <CardTitle className="font-display text-2xl text-foreground">{type.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-amber-100/70 mb-4">{type.description}</p>
+                  <p className="text-muted-foreground mb-4">{type.description}</p>
                   <Button
                     className="w-full bg-amber-500 text-black hover:bg-amber-400"
                     onClick={() => handleSelectType(type.id as UserType)}
@@ -88,9 +85,9 @@ export function LPUExplorer({ onSelectUserType, onNavigateToModule }: LPUExplore
           </div>
 
           {/* Features Overview */}
-          <Card className="luxe-card">
+          <Card className="bg-card border shadow-sm rounded-3xl">
             <CardHeader>
-              <CardTitle className="font-display text-2xl text-amber-50">What You'll Get</CardTitle>
+              <CardTitle className="font-display text-2xl text-foreground">What You'll Get</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -117,10 +114,10 @@ export function LPUExplorer({ onSelectUserType, onNavigateToModule }: LPUExplore
 
 function FeatureItem({ icon: Icon, label, description }: { icon: any; label: string; description: string }) {
   return (
-    <div className="p-4 rounded-2xl border border-amber-500/15 bg-black/30">
-      <Icon className="w-6 h-6 text-amber-300 mb-2" />
-      <div className="font-semibold text-amber-50 text-sm">{label}</div>
-      <div className="text-xs text-amber-100/60">{description}</div>
+    <div className="p-4 rounded-2xl border border-border bg-muted/30">
+      <Icon className="w-6 h-6 text-amber-500 dark:text-amber-300 mb-2" />
+      <div className="font-semibold text-foreground text-sm">{label}</div>
+      <div className="text-xs text-muted-foreground">{description}</div>
     </div>
   );
 }
@@ -181,14 +178,14 @@ function LPUExplorerModules({ userType, onNavigateToModule }: { userType: UserTy
   const modules = allModules.filter(m => m.for.includes(userType));
 
   return (
-    <div className="min-h-screen py-12">
+    <div className="min-h-screen bg-background text-foreground py-12">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-12">
-          <p className="eyebrow text-xs text-amber-300 mb-3">LPU Explorer</p>
-          <h2 className="font-display section-title text-4xl text-amber-50 mb-2">LPU Explorer Dashboard</h2>
-          <p className="text-amber-100/70">
-            Logged in as: <span className="text-amber-300 font-semibold capitalize">{userType.replace('-', ' ')}</span>
+          <p className="eyebrow text-xs text-amber-600 dark:text-amber-300 mb-3">LPU Explorer</p>
+          <h2 className="font-display section-title text-4xl text-foreground mb-2">LPU Explorer Dashboard</h2>
+          <p className="text-muted-foreground">
+            Logged in as: <span className="text-amber-600 dark:text-amber-300 font-semibold capitalize">{userType.replace('-', ' ')}</span>
           </p>
         </div>
 
@@ -197,18 +194,18 @@ function LPUExplorerModules({ userType, onNavigateToModule }: { userType: UserTy
           {modules.map((module) => (
             <Card
               key={module.id}
-              className="cursor-pointer transition-all hover:scale-[1.02] overflow-hidden group luxe-card"
+              className="cursor-pointer transition-all hover:-translate-y-1 overflow-hidden group bg-card border shadow-sm rounded-3xl"
               onClick={() => onNavigateToModule?.(module.id)}
             >
               <CardHeader>
                 <div className="text-5xl mb-3 group-hover:scale-110 transition-transform">{module.icon}</div>
-                <CardTitle className="font-display text-2xl text-amber-50">{module.title}</CardTitle>
+                <CardTitle className="font-display text-2xl text-foreground">{module.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-amber-100/70 mb-6">{module.description}</p>
+                <p className="text-muted-foreground mb-6">{module.description}</p>
                 <Button
                   variant="outline"
-                  className="w-full border-amber-500/40 text-amber-100 hover:bg-amber-500/10"
+                  className="w-full border-amber-500/40 text-foreground hover:bg-amber-500/10"
                 >
                   Explore {module.icon}
                 </Button>
@@ -218,16 +215,16 @@ function LPUExplorerModules({ userType, onNavigateToModule }: { userType: UserTy
         </div>
 
         {/* Quick Tips */}
-        <Card className="mt-12 luxe-card">
+        <Card className="mt-12 bg-card border shadow-sm rounded-3xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-amber-50 font-display">
+            <CardTitle className="flex items-center gap-2 text-foreground font-display">
               <span>💡</span> Quick Tips
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-amber-100/70 space-y-2">
+          <CardContent className="text-muted-foreground space-y-2">
             <p>✓ Start with Videos to get real perspective from seniors</p>
             <p>✓ Read Success Stories to see diverse career paths</p>
-            <p>✓ Keep Procedures & Guides handy for quick reference</p>
+            <p>✓ Keep Procedures &amp; Guides handy for quick reference</p>
             <p>✓ Senior Comments are raw and unfiltered - most helpful for first month jitters</p>
             <p>✓ If unsure about your branch, take the "Is this branch for you?" quiz</p>
           </CardContent>

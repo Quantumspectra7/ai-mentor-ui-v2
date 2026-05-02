@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,7 @@ interface ExpectationVsRealityProps {
 
 export function ExpectationVsReality({ onBack }: ExpectationVsRealityProps) {
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 bg-background text-foreground min-h-screen py-10 px-4 sm:px-6 max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-12">
           {onBack && (
@@ -19,9 +19,9 @@ export function ExpectationVsReality({ onBack }: ExpectationVsRealityProps) {
               ← Back
             </Button>
           )}
-          <p className="eyebrow text-xs text-amber-300">Reality Check</p>
-          <h1 className="font-display hero-title text-4xl text-amber-50 mb-2 md:text-5xl">⚡ Expectation vs Reality</h1>
-          <p className="text-amber-100/70">
+          <p className="eyebrow text-xs text-amber-600 dark:text-amber-300">Reality Check</p>
+          <h1 className="font-display hero-title text-4xl text-foreground mb-2 md:text-5xl">⚡ Expectation vs Reality</h1>
+          <p className="text-muted-foreground">
             The honest truth about college life - prepared from 100+ senior interviews
           </p>
         </div>
@@ -51,7 +51,7 @@ export function ExpectationVsReality({ onBack }: ExpectationVsRealityProps) {
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-display text-xl text-amber-50">{item.category}</h3>
+                  <h3 className="font-display text-xl text-foreground">{item.category}</h3>
                   <Badge
                     className={
                       item.impact === 'positive'
@@ -68,21 +68,21 @@ export function ExpectationVsReality({ onBack }: ExpectationVsRealityProps) {
 
               <CardContent className="space-y-4">
                 {/* Expectation */}
-                <div className="p-4 rounded-2xl bg-black/30 border border-teal-500/30">
-                  <p className="text-teal-200 font-semibold text-sm mb-2">📌 What You Expect:</p>
-                  <p className="text-amber-50">{item.expectation}</p>
+                <div className="p-4 rounded-2xl bg-muted/40 border border-teal-500/30">
+                  <p className="text-foreground font-semibold text-sm mb-2">📌 What You Expect:</p>
+                  <p className="text-foreground">{item.expectation}</p>
                 </div>
 
                 {/* Reality */}
-                <div className="p-4 rounded-2xl bg-black/30 border border-amber-500/30">
-                  <p className="text-amber-200 font-semibold text-sm mb-2">⚡ The Reality:</p>
-                  <p className="text-amber-50">{item.reality}</p>
+                <div className="p-4 rounded-2xl bg-muted/40 border border-amber-500/30">
+                  <p className="text-foreground font-semibold text-sm mb-2">⚡ The Reality:</p>
+                  <p className="text-foreground">{item.reality}</p>
                 </div>
 
                 {/* Advice */}
-                <div className="p-4 rounded-2xl bg-black/30 border-l-2 border-amber-500">
-                  <p className="text-amber-200 font-semibold text-sm mb-2">💡 Our Advice:</p>
-                  <p className="text-amber-100/70">{item.advice}</p>
+                <div className="p-4 rounded-2xl bg-muted/40 border-l-2 border-amber-500">
+                  <p className="text-foreground font-semibold text-sm mb-2">💡 Our Advice:</p>
+                  <p className="text-muted-foreground">{item.advice}</p>
                 </div>
               </CardContent>
             </Card>
@@ -92,16 +92,16 @@ export function ExpectationVsReality({ onBack }: ExpectationVsRealityProps) {
         {/* Final Wisdom */}
         <Card className="mt-16 luxe-card border-amber-500/30">
           <CardHeader>
-            <CardTitle className="font-display text-2xl text-amber-50">🌟 The Golden Rule</CardTitle>
+            <CardTitle className="font-display text-2xl text-foreground">🌟 The Golden Rule</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-amber-100/70">
+          <CardContent className="space-y-4 text-muted-foreground">
             <p>
               <strong>College is not about perfection. It's about growth.</strong>
             </p>
             <p>
               Every senior who succeeded did so by failing first, learning, and trying again. Your first semester won't define your college, but it will teach you what you need to survive. And that's valuable.
             </p>
-            <p className="text-amber-200 italic">
+            <p className="text-foreground italic">
               "The worst part is knowing nothing. Once you know what to expect, you can prepare. And you just did. You're already ahead." - Your Seniors
             </p>
           </CardContent>
@@ -110,10 +110,10 @@ export function ExpectationVsReality({ onBack }: ExpectationVsRealityProps) {
         {/* Action Items */}
         <Card className="mt-8 luxe-card border-amber-500/20">
           <CardHeader>
-            <CardTitle className="font-display text-2xl text-amber-50">✅ Before Your First Day:</CardTitle>
+            <CardTitle className="font-display text-2xl text-foreground">✅ Before Your First Day:</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2 text-amber-100/70">
+            <ul className="space-y-2 text-muted-foreground">
               <li>✓ Accept that you'll feel lost - that's the first sign of growth</li>
               <li>✓ Make friends with at least 2-3 people in your room/wing</li>
               <li>✓ Join 1-2 clubs that match your interests</li>
@@ -127,3 +127,6 @@ export function ExpectationVsReality({ onBack }: ExpectationVsRealityProps) {
     </div>
   );
 }
+
+
+

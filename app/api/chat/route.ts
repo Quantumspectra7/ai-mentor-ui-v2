@@ -1,22 +1,43 @@
 import Groq from 'groq-sdk';
 import { NextRequest, NextResponse } from 'next/server';
 
-const MENTOR_SYSTEM_PROMPT = `You are a student-first AI mentor focused on real campus life and day-to-day college success. Your role is to:
+const MENTOR_SYSTEM_PROMPT = `[SYSTEM ROLE]
+You are a highly personalized, agentic AI engineering mentor. Your primary objective is to help the user grow in their career, build their skills, manage their weaknesses, and maintain mental well-being.
+You have access to their profile, which includes their weak subjects, strengths, attendance, stress levels, and procrastination habits.
 
-1. Prioritize practical student needs: schedules, assignments, exams, attendance, deadlines, and routines
-2. Help with campus survival: clubs, hostel life, food, transport, navigation, and peer connections
-3. Give step-by-step, actionable advice with clear next actions
-4. Be friendly, relatable, and supportive without being preachy
-5. Adapt tone to the student's mood (stressed, neutral, motivated)
-6. Keep answers short: 2-3 lines max unless the user explicitly asks for detail
-7. Use simple language, avoid jargon, and be specific when possible
-8. Reference their current day/phase in the 90-day journey when it helps
-9. Encourage healthy habits: sleep, focus, stress control, and balance
-10. If unsure, ask a short clarifying question before giving a long answer
+[MOOD-BASED DELIVERY]
+You MUST adjust your tone based on the user's current mood constraint:
+- STRESSED: Speak with extreme empathy, validate their feelings, use a calm, soothing tone, and reduce their workload. Suggest breaks.
+- MOTIVATED/PUMPED: Speak with high energy, enthusiasm, and hype! Use exclamation marks, challenge them, and match their momentum.
+- NORMAL: Speak professionally, concisely, and act like a senior engineer mentoring a junior.
 
-11. Use the personalization details from the onboarding form when relevant
+[AGENTIC TOOL CALLING - EXTREMELY IMPORTANT]
+You have the ability to directly modify the user's timetable and daily objectives. 
+If the user asks you to add ANY task, objective, habit, or schedule change (e.g. "add a checklist for eating pasta"), you MUST append a JSON block at the very end of your response to execute the action.
+Do NOT ignore this.
 
-Remember: You're a helpful senior who gives practical, student-oriented guidance.`;
+Use the following format strictly at the END of your message:
+\`\`\`json
+{
+  "action": "ADD_TASK",
+  "title": "[Short Actionable Title]",
+  "why": "[Brief encouragement]",
+  "priority": "High" // or Medium or Low
+}
+\`\`\`
+To remove a task:
+\`\`\`json
+{
+  "action": "REMOVE_TASK",
+  "title": "[Keyword of task to remove]"
+}
+\`\`\`
+
+[CRITICAL REQUIREMENTS]
+1. Give a quick actionable answer first.
+2. Only output the JSON block if you are actively modifying the schedule.
+3. Keep answers concise (3-5 lines max by default).
+4. NEVER sound like a corporate bot.`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,37 +75,41 @@ export async function POST(request: NextRequest) {
     const {
       name,
       branch,
-      hostel,
-      interests,
-      extracurricular,
-      userType,
-      currentModule,
+      interests, // This maps to strengths/hobbies
+      weakSubjects,
+      stressLevel,
+      attendance,
+      procrastinationLevel,
       todayTasks,
-    } = safePersonalization as {
-      name?: string;
-      branch?: string;
-      hostel?: string;
-      interests?: string[];
-      extracurricular?: string;
-      userType?: string;
-      currentModule?: string | null;
-      todayTasks?: string[];
-    };
+      myCornerData,
+    } = safePersonalization as any;
+
+    let myCornerContext = '';
+    if (myCornerData && myCornerData.subjects) {
+      const subs = Object.values(myCornerData.subjects) as any[];
+      if (subs.length > 0) {
+        myCornerContext = 'My Corner (Subjects/Syllabus Progress): ' + subs.map(sub => {
+          const totalUnits = sub.units?.length || 0;
+          const completedUnits = sub.units?.filter((u: any) => u.completed).length || 0;
+          const filesCount = sub.files?.length || 0;
+          return `${sub.name} (${completedUnits}/${totalUnits} units done, ${filesCount} files)`;
+        }).join(' | ');
+      }
+    }
 
     const personalizationBits = [
       name ? `Name: ${name}` : null,
       branch ? `Branch: ${branch}` : null,
-      hostel ? `Hostel: ${hostel}` : null,
-      Array.isArray(interests) && interests.length > 0 ? `Interests: ${interests.join(', ')}` : null,
-      extracurricular ? `Co-curricular: ${extracurricular}` : null,
-      userType ? `User type: ${userType}` : null,
-      currentModule ? `Current module: ${currentModule}` : null,
+      Array.isArray(interests) && interests.length > 0 ? `Interests/Strengths: ${interests.join(', ')}` : null,
+      Array.isArray(weakSubjects) && weakSubjects.length > 0 ? `Weak Subjects: ${weakSubjects.join(', ')}` : null,
+      stressLevel !== undefined ? `Stress Level: ${stressLevel}/10` : null,
+      attendance !== undefined ? `Attendance: ${attendance}%` : null,
+      procrastinationLevel ? `Procrastination Level: ${procrastinationLevel}` : null,
       Array.isArray(todayTasks) && todayTasks.length > 0 ? `Today's tasks: ${todayTasks.join('; ')}` : null,
+      myCornerContext ? myCornerContext : null,
     ].filter(Boolean);
 
-    const contextMessage = `This is day ${currentDay} of their 90-day college journey (Phase ${phase}). They're in the ${
-      phase === 1 ? 'Orientation' : phase === 2 ? 'Growth' : 'Confidence'
-    } phase.${moodContext}${personalizationBits.length ? `\nPersonalization: ${personalizationBits.join(' | ')}` : ''}`;
+    const contextMessage = `This user is relying on you for mentorship. ${moodContext}${personalizationBits.length ? `\nPersonalization Context: ${personalizationBits.join(' | ')}` : ''}`;
 
     const messages = [
       {
@@ -115,11 +140,11 @@ export async function POST(request: NextRequest) {
       'phase',
       name ? 'name' : null,
       branch ? 'branch' : null,
-      hostel ? 'hostel' : null,
       Array.isArray(interests) && interests.length > 0 ? 'interests' : null,
-      extracurricular ? 'extracurricular' : null,
-      userType ? 'userType' : null,
-      currentModule ? 'currentModule' : null,
+      Array.isArray(weakSubjects) && weakSubjects.length > 0 ? 'weakSubjects' : null,
+      stressLevel !== undefined ? 'stressLevel' : null,
+      attendance !== undefined ? 'attendance' : null,
+      procrastinationLevel ? 'procrastinationLevel' : null,
       Array.isArray(todayTasks) && todayTasks.length > 0 ? 'todayTasks' : null,
     ].filter(Boolean);
 

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,7 +40,7 @@ export function SuccessStories({ onBack }: SuccesStoriesProps) {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 bg-background text-foreground min-h-screen py-10 px-4 sm:px-6 max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-12">
           {onBack && (
@@ -48,9 +48,9 @@ export function SuccessStories({ onBack }: SuccesStoriesProps) {
               ← Back
             </Button>
           )}
-          <p className="eyebrow text-xs text-amber-300">Success Stories</p>
-          <h1 className="font-display hero-title text-4xl text-amber-50 mb-2 md:text-5xl">🏆 Success Stories</h1>
-          <p className="text-amber-100/70">
+          <p className="eyebrow text-xs text-amber-600 dark:text-amber-300">Success Stories</p>
+          <h1 className="font-display hero-title text-4xl text-foreground mb-2 md:text-5xl">🏆 Success Stories</h1>
+          <p className="text-muted-foreground">
             Real placements, hackathon wins, internships, and startups from LPU students
           </p>
         </div>
@@ -58,7 +58,7 @@ export function SuccessStories({ onBack }: SuccesStoriesProps) {
         {/* Filters */}
         <div className="mb-8">
           <div className="mb-4">
-            <p className="text-sm font-semibold text-amber-100/70 mb-2">Filter by Branch:</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">Filter by Branch:</p>
             <div className="flex flex-wrap gap-2">
               {branches.map((branch) => (
                 <Button
@@ -68,7 +68,7 @@ export function SuccessStories({ onBack }: SuccesStoriesProps) {
                   className={
                     selectedBranch === branch
                       ? 'bg-amber-500 text-black hover:bg-amber-400'
-                      : 'border-amber-500/30 text-amber-100'
+                      : 'border-amber-500/30 text-foreground'
                   }
                 >
                   {branch.toUpperCase()}
@@ -78,7 +78,7 @@ export function SuccessStories({ onBack }: SuccesStoriesProps) {
           </div>
 
           <div>
-            <p className="text-sm font-semibold text-amber-100/70 mb-2">Filter by Achievement:</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">Filter by Achievement:</p>
             <div className="flex flex-wrap gap-2">
               {categories.map((cat) => (
                 <Button
@@ -88,7 +88,7 @@ export function SuccessStories({ onBack }: SuccesStoriesProps) {
                   className={
                     selectedCategory === cat
                       ? 'bg-teal-500 text-black hover:bg-teal-400'
-                      : 'border-amber-500/30 text-amber-100'
+                      : 'border-amber-500/30 text-foreground'
                   }
                 >
                   {getCategoryIcon(cat)} {cat.replace('-', ' ').toUpperCase()}
@@ -111,8 +111,8 @@ export function SuccessStories({ onBack }: SuccesStoriesProps) {
                 <CardHeader className="flex-1">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <CardTitle className="font-display text-2xl text-amber-50 mb-1">{story.title}</CardTitle>
-                      <div className="flex gap-2 text-sm text-amber-100/60">
+                      <CardTitle className="font-display text-2xl text-foreground mb-1">{story.title}</CardTitle>
+                      <div className="flex gap-2 text-sm text-muted-foreground">
                         <span>📚 {story.branch}</span>
                         <span>📅 Batch {story.year}</span>
                       </div>
@@ -124,23 +124,23 @@ export function SuccessStories({ onBack }: SuccesStoriesProps) {
 
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-semibold text-amber-200 mb-1">The Journey:</h4>
-                      <p className="text-amber-100/70 text-sm">{story.story}</p>
+                      <h4 className="font-semibold text-foreground mb-1">The Journey:</h4>
+                      <p className="text-muted-foreground text-sm">{story.story}</p>
                     </div>
 
-                    <div className="bg-black/30 p-3 rounded-2xl border-l-2 border-amber-500">
-                      <h4 className="font-semibold text-amber-200 text-sm mb-1">🎯 Achievement:</h4>
-                      <p className="text-amber-100 text-sm font-bold">{story.achievement}</p>
+                    <div className="bg-muted/40 p-3 rounded-2xl border-l-2 border-amber-500">
+                      <h4 className="font-semibold text-foreground text-sm mb-1">🎯 Achievement:</h4>
+                      <p className="text-foreground text-sm font-bold">{story.achievement}</p>
                     </div>
 
-                    <div className="bg-black/30 p-3 rounded-2xl border-l-2 border-teal-400">
-                      <h4 className="font-semibold text-teal-200 text-sm mb-1">💡 Advice:</h4>
-                      <p className="text-amber-100/70 text-sm italic">{story.advice}</p>
+                    <div className="bg-muted/40 p-3 rounded-2xl border-l-2 border-teal-400">
+                      <h4 className="font-semibold text-foreground text-sm mb-1">💡 Advice:</h4>
+                      <p className="text-muted-foreground text-sm italic">{story.advice}</p>
                     </div>
 
                     <div className="flex flex-wrap gap-1">
                       {story.tags.map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs border-amber-500/30 text-amber-200">
+                        <Badge key={tag} variant="outline" className="text-xs border-amber-500/30 text-foreground">
                           #{tag}
                         </Badge>
                       ))}
@@ -148,7 +148,7 @@ export function SuccessStories({ onBack }: SuccesStoriesProps) {
                   </div>
 
                   {story.linkedIn && (
-                    <Button variant="outline" size="sm" className="mt-4 border-teal-400 text-teal-200 hover:bg-teal-500/10">
+                    <Button variant="outline" size="sm" className="mt-4 border-teal-400 text-foreground hover:bg-teal-500/10">
                       Connect on LinkedIn
                     </Button>
                   )}
@@ -160,16 +160,16 @@ export function SuccessStories({ onBack }: SuccesStoriesProps) {
 
         {filtered.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-amber-100/70 text-lg">No stories found with these filters. Try adjusting them!</p>
+            <p className="text-muted-foreground text-lg">No stories found with these filters. Try adjusting them!</p>
           </div>
         )}
 
         {/* Motivation Section */}
         <Card className="mt-16 luxe-card border-amber-500/30">
           <CardHeader>
-            <CardTitle className="font-display text-2xl text-amber-50">🌟 Key Insight</CardTitle>
+            <CardTitle className="font-display text-2xl text-foreground">🌟 Key Insight</CardTitle>
           </CardHeader>
-          <CardContent className="text-amber-100/70 space-y-3">
+          <CardContent className="text-muted-foreground space-y-3">
             <p>
               • <strong>Diverse paths exist</strong> - CSE students are not limited to IT, Mechanical + Code = Startup founders, Civil engineers in consulting firms
             </p>
@@ -187,3 +187,6 @@ export function SuccessStories({ onBack }: SuccesStoriesProps) {
     </div>
   );
 }
+
+
+

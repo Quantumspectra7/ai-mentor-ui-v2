@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,16 +44,16 @@ export function StudyResources({ onBack }: { onBack?: () => void }) {
               ← Back
             </Button>
           )}
-          <p className="eyebrow text-xs text-amber-300">Study Resources</p>
-          <h1 className="font-display hero-title text-4xl text-amber-50 md:text-5xl">
+          <p className="eyebrow text-xs text-amber-600 dark:text-amber-300">Study Resources</p>
+          <h1 className="font-display hero-title text-4xl text-foreground md:text-5xl">
             Curated Materials That Actually Help
           </h1>
-          <p className="mt-3 max-w-2xl text-sm text-amber-100/70 md:text-base">
+          <p className="mt-3 max-w-2xl text-sm text-muted-foreground md:text-base">
             Handpicked playlists, notes, tools, and short courses from trusted seniors
             and official sources. Save time, study smart, and stay consistent.
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-amber-200/70">
+        <div className="flex items-center gap-2 text-xs text-foreground/70">
           <Filter className="h-4 w-4" />
           {filtered.length} resources
         </div>
@@ -61,20 +61,20 @@ export function StudyResources({ onBack }: { onBack?: () => void }) {
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
         <div className="luxe-card rounded-3xl p-6">
-          <label className="text-xs uppercase tracking-[0.3em] text-amber-200/70">
+          <label className="text-xs uppercase tracking-[0.3em] text-foreground/70">
             Search
           </label>
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search by topic, subject, or tag"
-            className="mt-3 border-amber-500/30 bg-black/40 text-amber-50 placeholder:text-amber-200/40"
+            className="mt-3 border-amber-500/30 bg-muted/40 text-foreground placeholder:text-foreground/40"
           />
         </div>
         <div className="luxe-card rounded-3xl p-6">
           <div className="grid gap-4 md:grid-cols-3">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-amber-200/70">Category</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-foreground/70">Category</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {categories.map((item) => (
                   <Button
@@ -85,7 +85,7 @@ export function StudyResources({ onBack }: { onBack?: () => void }) {
                     className={
                       category === item
                         ? 'bg-amber-500 text-black hover:bg-amber-400'
-                        : 'border-amber-500/30 text-amber-100'
+                        : 'border-amber-500/30 text-foreground'
                     }
                   >
                     {item.replace('-', ' ')}
@@ -94,7 +94,7 @@ export function StudyResources({ onBack }: { onBack?: () => void }) {
               </div>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-amber-200/70">Level</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-foreground/70">Level</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {['all', 'beginner', 'intermediate', 'advanced'].map((item) => (
                   <Button
@@ -105,7 +105,7 @@ export function StudyResources({ onBack }: { onBack?: () => void }) {
                     className={
                       level === item
                         ? 'bg-amber-500 text-black hover:bg-amber-400'
-                        : 'border-amber-500/30 text-amber-100'
+                        : 'border-amber-500/30 text-foreground'
                     }
                   >
                     {item}
@@ -114,7 +114,7 @@ export function StudyResources({ onBack }: { onBack?: () => void }) {
               </div>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-amber-200/70">Type</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-foreground/70">Type</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {['all', ...resourceTypes].map((item) => (
                   <Button
@@ -125,7 +125,7 @@ export function StudyResources({ onBack }: { onBack?: () => void }) {
                     className={
                       type === item
                         ? 'bg-amber-500 text-black hover:bg-amber-400'
-                        : 'border-amber-500/30 text-amber-100'
+                        : 'border-amber-500/30 text-foreground'
                     }
                   >
                     {item}
@@ -143,8 +143,8 @@ export function StudyResources({ onBack }: { onBack?: () => void }) {
             <CardHeader className="space-y-3">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="eyebrow text-[10px] text-amber-200/70">{item.category}</p>
-                  <CardTitle className="font-display text-2xl text-amber-50">
+                  <p className="eyebrow text-[10px] text-foreground/70">{item.category}</p>
+                  <CardTitle className="font-display text-2xl text-foreground">
                     {item.title}
                   </CardTitle>
                 </div>
@@ -152,23 +152,23 @@ export function StudyResources({ onBack }: { onBack?: () => void }) {
                   {item.level}
                 </Badge>
               </div>
-              <p className="text-sm text-amber-100/70">{item.description}</p>
+              <p className="text-sm text-muted-foreground">{item.description}</p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2 text-xs">
-                <Badge variant="outline" className="border-amber-500/40 text-amber-100">
+                <Badge variant="outline" className="border-amber-500/40 text-foreground">
                   {item.type}
                 </Badge>
-                <Badge variant="outline" className="border-amber-500/40 text-amber-100">
+                <Badge variant="outline" className="border-amber-500/40 text-foreground">
                   {item.duration}
                 </Badge>
-                <Badge variant="outline" className="border-amber-500/40 text-amber-100">
+                <Badge variant="outline" className="border-amber-500/40 text-foreground">
                   {item.source}
                 </Badge>
               </div>
               <div className="flex flex-wrap gap-2">
                 {item.tags.map((tag) => (
-                  <Badge key={tag} variant="outline" className="border-amber-500/20 text-amber-200/70">
+                  <Badge key={tag} variant="outline" className="border-amber-500/20 text-foreground/70">
                     #{tag}
                   </Badge>
                 ))}
@@ -188,7 +188,7 @@ export function StudyResources({ onBack }: { onBack?: () => void }) {
 
       {filtered.length === 0 && (
         <Card className="luxe-card rounded-3xl border-amber-500/20">
-          <CardContent className="py-10 text-center text-amber-100/70">
+          <CardContent className="py-10 text-center text-muted-foreground">
             No resources match these filters yet. Try a different category or search term.
           </CardContent>
         </Card>
@@ -196,3 +196,5 @@ export function StudyResources({ onBack }: { onBack?: () => void }) {
     </div>
   );
 }
+
+

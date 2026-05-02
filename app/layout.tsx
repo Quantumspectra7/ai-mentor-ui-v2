@@ -5,7 +5,7 @@ import { Playfair_Display, Manrope } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-context'
 import { ThemeWrapper } from '@/components/theme-wrapper'
-import { AuthProvider } from '@/components/auth-provider'
+import { Toaster } from 'react-hot-toast'
 
 const playfair = Playfair_Display({
   weight: ['400', '500', '600', '700'],
@@ -61,13 +61,12 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="font-sans antialiased bg-background text-foreground">
-        <AuthProvider>
-          <ThemeProvider>
-            <ThemeWrapper>
-              {children}
-            </ThemeWrapper>
-          </ThemeProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <ThemeWrapper>
+            {children}
+            <Toaster position="bottom-center" />
+          </ThemeWrapper>
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -161,12 +161,12 @@ export interface Procedure {
   id: string;
   title: string;
   category:
-    | 'admission'
-    | 'documents'
-    | 'hostel'
-    | 'fees'
-    | 'academic'
-    | 'identity';
+  | 'admission'
+  | 'documents'
+  | 'hostel'
+  | 'fees'
+  | 'academic'
+  | 'identity';
   steps: string[];
   estimatedTime: string;
   important: boolean;
@@ -635,147 +635,147 @@ export const branchQuiz: QuizQuestion[] = [
   },
 ];
 
-  // Study Resources
-  export interface StudyResource {
-    id: string;
-    title: string;
-    category:
-      | 'coding'
-      | 'math'
-      | 'physics'
-      | 'electronics'
-      | 'mechanical'
-      | 'civil'
-      | 'soft-skills'
-      | 'placement';
-    type: 'playlist' | 'course' | 'doc' | 'pdf' | 'tool';
-    level: 'beginner' | 'intermediate' | 'advanced';
-    duration: string;
-    source: string;
-    url: string;
-    description: string;
-    tags: string[];
-  }
+// Study Resources
+export interface StudyResource {
+  id: string;
+  title: string;
+  category:
+  | 'coding'
+  | 'math'
+  | 'physics'
+  | 'electronics'
+  | 'mechanical'
+  | 'civil'
+  | 'soft-skills'
+  | 'placement';
+  type: 'playlist' | 'course' | 'doc' | 'pdf' | 'tool';
+  level: 'beginner' | 'intermediate' | 'advanced';
+  duration: string;
+  source: string;
+  url: string;
+  description: string;
+  tags: string[];
+}
 
-  export const studyResources: StudyResource[] = [
-    {
-      id: 'res-1',
-      title: 'C Programming Essentials for Freshers',
-      category: 'coding',
-      type: 'course',
-      level: 'beginner',
-      duration: '6 hours',
-      source: 'NPTEL',
-      url: 'https://nptel.ac.in/courses/106105171',
-      description: 'Start from zero: variables, loops, functions, and pointers with practice.',
-      tags: ['c', 'fundamentals', 'first-sem'],
-    },
-    {
-      id: 'res-2',
-      title: 'Discrete Mathematics Crash Notes',
-      category: 'math',
-      type: 'pdf',
-      level: 'beginner',
-      duration: '42 pages',
-      source: 'LPU Study Circle',
-      url: 'https://example.com/lpu-discrete-math-notes.pdf',
-      description: 'Short notes with solved questions for sets, relations, graphs, and logic.',
-      tags: ['math', 'notes', 'exam'],
-    },
-    {
-      id: 'res-3',
-      title: 'Engineering Physics One-Shots',
-      category: 'physics',
-      type: 'playlist',
-      level: 'beginner',
-      duration: '12 videos',
-      source: 'YouTube',
-      url: 'https://www.youtube.com/playlist?list=PL-physics',
-      description: 'Concise video lectures on waves, optics, and modern physics.',
-      tags: ['physics', 'playlist', 'revision'],
-    },
-    {
-      id: 'res-4',
-      title: 'Digital Electronics Cheatsheet',
-      category: 'electronics',
-      type: 'pdf',
-      level: 'beginner',
-      duration: '18 pages',
-      source: 'ECE Seniors',
-      url: 'https://example.com/digital-electronics-cheatsheet.pdf',
-      description: 'Logic gates, K-maps, flip-flops, and common ICs in one place.',
-      tags: ['ece', 'digital', 'exam'],
-    },
-    {
-      id: 'res-5',
-      title: 'AutoCAD Starter Toolkit',
-      category: 'civil',
-      type: 'tool',
-      level: 'beginner',
-      duration: 'Setup + 3 tutorials',
-      source: 'Autodesk',
-      url: 'https://www.autodesk.com/products/autocad',
-      description: 'Install AutoCAD and follow three starter tutorials for layout drawings.',
-      tags: ['civil', 'cad', 'tools'],
-    },
-    {
-      id: 'res-6',
-      title: 'SolidWorks Basics: Parts to Assembly',
-      category: 'mechanical',
-      type: 'course',
-      level: 'beginner',
-      duration: '4 hours',
-      source: 'Coursera',
-      url: 'https://www.coursera.org/learn/solidworks',
-      description: 'Create parts, constraints, and assemblies with hands-on exercises.',
-      tags: ['mechanical', 'cad', 'design'],
-    },
-    {
-      id: 'res-7',
-      title: 'Resume Blueprint for First-Year Students',
-      category: 'placement',
-      type: 'doc',
-      level: 'beginner',
-      duration: '15 min read',
-      source: 'LPU Career Cell',
-      url: 'https://example.com/lpu-resume-blueprint',
-      description: 'Clean resume template with do and do not examples.',
-      tags: ['resume', 'placement', 'career'],
-    },
-    {
-      id: 'res-8',
-      title: 'Communication Skills for Engineers',
-      category: 'soft-skills',
-      type: 'course',
-      level: 'beginner',
-      duration: '3 hours',
-      source: 'LinkedIn Learning',
-      url: 'https://www.linkedin.com/learning/communication-skills-for-engineers',
-      description: 'Improve presentations, interviews, and peer collaboration.',
-      tags: ['communication', 'soft-skills', 'interview'],
-    },
-    {
-      id: 'res-9',
-      title: 'Data Structures in 30 Days',
-      category: 'coding',
-      type: 'playlist',
-      level: 'intermediate',
-      duration: '30 videos',
-      source: 'YouTube',
-      url: 'https://www.youtube.com/playlist?list=PL-dsa-30days',
-      description: 'Step-by-step DSA roadmap with practice problems.',
-      tags: ['dsa', 'placement', 'coding'],
-    },
-    {
-      id: 'res-10',
-      title: 'Linear Algebra Visual Notes',
-      category: 'math',
-      type: 'pdf',
-      level: 'beginner',
-      duration: '26 pages',
-      source: 'LPU Math Club',
-      url: 'https://example.com/linear-algebra-visual-notes.pdf',
-      description: 'Vectors, matrices, eigenvalues with diagrams and shortcuts.',
-      tags: ['math', 'linear-algebra', 'visual'],
-    },
-  ];
+export const studyResources: StudyResource[] = [
+  {
+    id: 'res-1',
+    title: 'C Programming Essentials for Freshers',
+    category: 'coding',
+    type: 'course',
+    level: 'beginner',
+    duration: '6 hours',
+    source: 'NPTEL',
+    url: 'https://nptel.ac.in/courses/106105171',
+    description: 'Start from zero: variables, loops, functions, and pointers with practice.',
+    tags: ['c', 'fundamentals', 'first-sem'],
+  },
+  {
+    id: 'res-2',
+    title: 'Discrete Mathematics Crash Notes',
+    category: 'math',
+    type: 'pdf',
+    level: 'beginner',
+    duration: '42 pages',
+    source: 'LPU Study Circle',
+    url: 'https://example.com/lpu-discrete-math-notes.pdf',
+    description: 'Short notes with solved questions for sets, relations, graphs, and logic.',
+    tags: ['math', 'notes', 'exam'],
+  },
+  {
+    id: 'res-3',
+    title: 'Engineering Physics One-Shots',
+    category: 'physics',
+    type: 'playlist',
+    level: 'beginner',
+    duration: '12 videos',
+    source: 'YouTube',
+    url: 'https://www.youtube.com/playlist?list=PL-physics',
+    description: 'Concise video lectures on waves, optics, and modern physics.',
+    tags: ['physics', 'playlist', 'revision'],
+  },
+  {
+    id: 'res-4',
+    title: 'Digital Electronics Cheatsheet',
+    category: 'electronics',
+    type: 'pdf',
+    level: 'beginner',
+    duration: '18 pages',
+    source: 'ECE Seniors',
+    url: 'https://example.com/digital-electronics-cheatsheet.pdf',
+    description: 'Logic gates, K-maps, flip-flops, and common ICs in one place.',
+    tags: ['ece', 'digital', 'exam'],
+  },
+  {
+    id: 'res-5',
+    title: 'AutoCAD Starter Toolkit',
+    category: 'civil',
+    type: 'tool',
+    level: 'beginner',
+    duration: 'Setup + 3 tutorials',
+    source: 'Autodesk',
+    url: 'https://www.autodesk.com/products/autocad',
+    description: 'Install AutoCAD and follow three starter tutorials for layout drawings.',
+    tags: ['civil', 'cad', 'tools'],
+  },
+  {
+    id: 'res-6',
+    title: 'SolidWorks Basics: Parts to Assembly',
+    category: 'mechanical',
+    type: 'course',
+    level: 'beginner',
+    duration: '4 hours',
+    source: 'Coursera',
+    url: 'https://www.coursera.org/learn/solidworks',
+    description: 'Create parts, constraints, and assemblies with hands-on exercises.',
+    tags: ['mechanical', 'cad', 'design'],
+  },
+  {
+    id: 'res-7',
+    title: 'Resume Blueprint for First-Year Students',
+    category: 'placement',
+    type: 'doc',
+    level: 'beginner',
+    duration: '15 min read',
+    source: 'LPU Career Cell',
+    url: 'https://example.com/lpu-resume-blueprint',
+    description: 'Clean resume template with do and do not examples.',
+    tags: ['resume', 'placement', 'career'],
+  },
+  {
+    id: 'res-8',
+    title: 'Communication Skills for Engineers',
+    category: 'soft-skills',
+    type: 'course',
+    level: 'beginner',
+    duration: '3 hours',
+    source: 'LinkedIn Learning',
+    url: 'https://www.linkedin.com/learning/communication-skills-for-engineers',
+    description: 'Improve presentations, interviews, and peer collaboration.',
+    tags: ['communication', 'soft-skills', 'interview'],
+  },
+  {
+    id: 'res-9',
+    title: 'Data Structures in 30 Days',
+    category: 'coding',
+    type: 'playlist',
+    level: 'intermediate',
+    duration: '30 videos',
+    source: 'YouTube',
+    url: 'https://www.youtube.com/watch?v=0bHoB32fuj0&list=PLgUwDviBIf0oF6QL8m22w1hIDC1vJ_BHz',
+    description: 'Step-by-step DSA roadmap with practice problems.',
+    tags: ['dsa', 'placement', 'coding'],
+  },
+  {
+    id: 'res-10',
+    title: 'Linear Algebra Visual Notes',
+    category: 'math',
+    type: 'pdf',
+    level: 'beginner',
+    duration: '26 pages',
+    source: 'LPU Math Club',
+    url: 'https://example.com/linear-algebra-visual-notes.pdf',
+    description: 'Vectors, matrices, eigenvalues with diagrams and shortcuts.',
+    tags: ['math', 'linear-algebra', 'visual'],
+  },
+];
